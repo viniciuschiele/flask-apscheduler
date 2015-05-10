@@ -1,0 +1,2 @@
+flask>=0.10.1
+apscheduler>=3.0.3
