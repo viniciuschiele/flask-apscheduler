@@ -47,6 +47,9 @@ class APScheduler(object):
         return self.__scheduler
 
     def init_app(self, app):
+        if not app:
+            raise ValueError('app must be a Flask application')
+
         options = dict()
 
         job_stores = app.config.get('APSCHEDULER_JOBSTORES')
@@ -71,16 +74,16 @@ class APScheduler(object):
 
         if isinstance(jobs, list):
             for job in jobs:
-                self.__load_job(job)
+                self.__load_job(app, job)
 
         if isinstance(jobs, dict):
             for id, job in jobs.items():
-                self.__load_job(job, id)
+                self.__load_job(app, job, id)
 
         hosts = app.config.get('APSCHEDULER_ALLOWED_HOSTS')
         if hosts:
             for host in hosts:
-                self.__hosts.append(host.lower())
+                self.__allowed_hosts.append(host.lower())
 
     def start(self):
         if not self.allowed_hosts:
@@ -96,7 +99,11 @@ class APScheduler(object):
     def shutdown(self, wait=True):
         self.__scheduler.shutdown(wait)
 
-    def __load_job(self, job, id=None):
+    def __load_job(self, app, job, id=None):
+        def call_func(*args, **kwargs):
+            with app.app_context():
+                func(*args, **kwargs)
+
         func = job.get('func')
 
         if not func:
@@ -108,9 +115,9 @@ class APScheduler(object):
         if not hasattr(func, '__call__'):
             raise Exception('func must be a function.')
 
-        trigger = job.get('trigger', 'interval')
-        args = job.get('args')
-        kwargs = job.get('kwargs')
+        trigger = job.get('trigger', 'date')
+        func_args = job.get('args')
+        func_kwargs = job.get('kwargs')
 
         trigger_args = dict()
 
@@ -138,7 +145,7 @@ class APScheduler(object):
         else:
             raise Exception('Trigger %s is invalid.' % trigger)
 
-        self.__scheduler.add_job(func, trigger, args, kwargs, id, **trigger_args)
+        self.__scheduler.add_job(call_func, trigger, func_args, func_kwargs, id, **trigger_args)
 
     @staticmethod
     def __copy_item(prop, src, dst):
