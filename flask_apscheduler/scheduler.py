@@ -73,7 +73,7 @@ class APScheduler(object):
             for id, job in jobs.items():
                 self.__load_job(job, id)
 
-        hosts = app.config.get('APSCHEDULER_HOSTS')
+        hosts = app.config.get('APSCHEDULER_ALLOWED_HOSTS')
         if hosts:
             for host in hosts:
                 self.__hosts.append(host.lower())

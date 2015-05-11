@@ -12,6 +12,8 @@ class Config(object):
         }
     ]
 
+    APSCHEDULER_ALLOWED_HOSTS = ['my_servers_name']
+
 
 def job1(a, b):
     print(str(a) + ' ' + str(b))
