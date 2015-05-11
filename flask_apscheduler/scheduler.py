@@ -83,12 +83,12 @@ class APScheduler(object):
                 self.__hosts.append(host.lower())
 
     def start(self):
-        if not self.__allowed_hosts:
+        if not self.allowed_hosts:
             LOGGER.debug('None server allowed to start the scheduler.')
 
-        if self.host_name not in self.__allowed_hosts and '*' not in self.__allowed_hosts:
+        if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:
             LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
-                         (self.host_name, ','.join(self.__allowed_hosts)))
+                         (self.host_name, ','.join(self.allowed_hosts)))
             return
 
         self.__scheduler.start()
