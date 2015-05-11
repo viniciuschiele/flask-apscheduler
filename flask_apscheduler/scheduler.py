@@ -28,7 +28,7 @@ class APScheduler(object):
 
     def __init__(self, scheduler=None, app=None):
         self.__scheduler = scheduler or BackgroundScheduler()
-        self.__hosts = []
+        self.__allowed_hosts = ['*']
         self.__host_name = socket.gethostname().lower()
 
         if app:
@@ -37,6 +37,10 @@ class APScheduler(object):
     @property
     def host_name(self):
         return self.__host_name
+
+    @property
+    def allowed_hosts(self):
+        return self.__allowed_hosts
 
     @property
     def scheduler(self):
@@ -79,11 +83,13 @@ class APScheduler(object):
                 self.__hosts.append(host.lower())
 
     def start(self):
-        if self.__hosts:
-            if self.host_name not in self.__hosts:
-                LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
-                             (self.host_name, ','.join(self.__hosts)))
-                return
+        if not self.__allowed_hosts:
+            LOGGER.debug('None server allowed to start the scheduler.')
+
+        if self.host_name not in self.__allowed_hosts and '*' not in self.__allowed_hosts:
+            LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
+                         (self.host_name, ','.join(self.__allowed_hosts)))
+            return
 
         self.__scheduler.start()
 
