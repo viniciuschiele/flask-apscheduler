@@ -3,7 +3,7 @@ Flask-APScheduler is a Flask extension which adds support for the APScheduler.
 
 ##Features
 - Loads scheduler configuration from Flask configuration (app.config).
-- Loads jobs definition from Flask configuration.
+- Loads job definitions from Flask configuration.
 - Allows to specified the host name which will run the scheduler.
 
 ##Documentation
