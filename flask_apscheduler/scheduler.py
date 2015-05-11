@@ -12,50 +12,58 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""APScheduler implementation."""
 
 import socket
+import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask_apscheduler.utils import import_string
 
+LOGGER = logging.getLogger(__name__)
+
 
 class APScheduler(object):
+    """Scheduler that loads the jobs from Flask configuration."""
+
     def __init__(self, scheduler=None, app=None):
         self.__scheduler = scheduler or BackgroundScheduler()
-        self.__app = app
-        self.__servers = None
+        self.__hosts = []
+        self.__host_name = socket.gethostname().lower()
 
         if app:
             self.init_app(app)
+
+    @property
+    def host_name(self):
+        return self.__host_name
 
     @property
     def scheduler(self):
         return self.__scheduler
 
     def init_app(self, app):
-        self.__app = app
-
         options = dict()
 
-        jobstores = self.__app.config.get('APSCHEDULER_JOBSTORES')
-        if jobstores:
-            options['jobstores'] = jobstores
+        job_stores = app.config.get('APSCHEDULER_JOBSTORES')
+        if job_stores:
+            options['jobstores'] = job_stores
 
-        executors = self.__app.config.get('APSCHEDULER_EXECUTORS')
+        executors = app.config.get('APSCHEDULER_EXECUTORS')
         if executors:
             options['executors'] = executors
 
-        job_defaults = self.__app.config.get('APSCHEDULER_JOB_DEFAULTS')
+        job_defaults = app.config.get('APSCHEDULER_JOB_DEFAULTS')
         if job_defaults:
             options['job_defaults'] = job_defaults
 
-        timezone = self.__app.config.get('APSCHEDULER_TIMEZONE')
+        timezone = app.config.get('APSCHEDULER_TIMEZONE')
         if timezone:
             options['timezone'] = timezone
 
         self.__scheduler.configure(**options)
 
-        jobs = self.__app.config.get('APSCHEDULER_JOBS')
+        jobs = app.config.get('APSCHEDULER_JOBS')
 
         if isinstance(jobs, list):
             for job in jobs:
@@ -65,16 +73,16 @@ class APScheduler(object):
             for id, job in jobs.items():
                 self.__load_job(job, id)
 
-        servers = self.__app.config.get('APSCHEDULER_SERVERS')
-        if servers:
-            self.__servers = []
-            for server in servers:
-                self.__servers.append(server.lower())
+        hosts = app.config.get('APSCHEDULER_HOSTS')
+        if hosts:
+            for host in hosts:
+                self.__hosts.append(host.lower())
 
     def start(self):
-        if self.__servers:
-            server_name = socket.gethostname().lower()
-            if server_name not in self.__servers:
+        if self.__hosts:
+            if self.host_name not in self.__hosts:
+                LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
+                             (self.host_name, ','.join(self.__hosts)))
                 return
 
         self.__scheduler.start()

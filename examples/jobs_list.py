@@ -12,6 +12,8 @@ class Config(object):
         }
     ]
 
+    APSCHEDULER_HOSTS = ['localhost']
+
 
 def job1(a, b):
     print(str(a) + ' ' + str(b))
@@ -25,5 +27,3 @@ scheduler.init_app(app)
 scheduler.start()
 
 app.run()
-
-

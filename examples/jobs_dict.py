@@ -19,11 +19,9 @@ def job1(a, b):
 
 app = Flask(__name__)
 app.config.from_object(Config())
-scheduler = APScheduler()
 
+scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
 app.run()
-
-

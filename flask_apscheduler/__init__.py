@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask_apscheduler.schedulers import APScheduler
+from flask_apscheduler.scheduler import APScheduler
