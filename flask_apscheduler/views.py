@@ -1,5 +1,6 @@
 import json
 
+from collections import OrderedDict
 from flask import current_app as app
 from flask import jsonify
 from flask import Response
@@ -7,7 +8,7 @@ from flask_apscheduler.utils import job_to_dict
 
 
 def get_job(job_id):
-    job = app.apscheduler.get_job(job_id)
+    job = app.apscheduler.scheduler.get_job(job_id)
 
     if job:
         return Response(json.dumps(job_to_dict(job), indent=2), mimetype='application/json')
@@ -16,7 +17,7 @@ def get_job(job_id):
 
 
 def get_jobs():
-    jobs = app.apscheduler.get_jobs()
+    jobs = app.apscheduler.scheduler.get_jobs()
 
     job_states = []
 
@@ -27,7 +28,7 @@ def get_jobs():
 
 
 def run_job(job_id):
-    job = app.apscheduler.get_job(job_id)
+    job = app.apscheduler.scheduler.get_job(job_id)
 
     if not job:
         response = jsonify(error_message='Job %s not found' % job_id)
@@ -41,3 +42,11 @@ def run_job(job_id):
         response = jsonify(error_message=str(e))
         response.status_code = 500
         return response
+
+
+def get_hosts():
+    d = OrderedDict()
+    d['current_host'] = app.apscheduler.host_name
+    d['allowed_hosts'] = app.apscheduler.allowed_hosts
+
+    return Response(json.dumps(d, indent=2), mimetype='application/json')

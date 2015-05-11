@@ -23,6 +23,7 @@ from apscheduler.util import ref_to_obj
 from flask_apscheduler.views import get_job
 from flask_apscheduler.views import get_jobs
 from flask_apscheduler.views import run_job
+from flask_apscheduler.views import get_hosts
 
 LOGGER = logging.getLogger(__name__)
 
@@ -58,12 +59,6 @@ class APScheduler(object):
 
         self.__load_config(app)
         self.__load_views(app)
-
-    def get_job(self, job_id):
-        return self.__scheduler.get_job(job_id)
-
-    def get_jobs(self):
-        return self.__scheduler.get_jobs()
 
     def start(self):
         if not self.allowed_hosts:
@@ -165,6 +160,7 @@ class APScheduler(object):
         app.add_url_rule('/jobs', 'get_jobs', get_jobs)
         app.add_url_rule('/jobs/<job_id>', 'get_job', get_job)
         app.add_url_rule('/jobs/<job_id>/run', 'run_job', run_job)
+        app.add_url_rule('/hosts', 'get_hosts', get_hosts)
 
     @staticmethod
     def __copy_item(prop, src, dst):

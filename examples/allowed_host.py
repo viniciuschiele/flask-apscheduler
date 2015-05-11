@@ -5,10 +5,12 @@ from flask_apscheduler import APScheduler
 class Config(object):
     APSCHEDULER_JOBS = [
         {
-            'func': 'examples.jobs_list.job1',
-            'trigger': 'cron',
-            'second': 10,
-            'args': (1, 2)
+            'func': '__main__:job1',
+            'args': (1, 2),
+            'trigger': {
+                'type': 'cron',
+                'second': 10
+            }
         }
     ]
 

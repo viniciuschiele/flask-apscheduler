@@ -26,4 +26,5 @@ def job_to_dict(job):
     d['trigger'] = str(job.trigger)
     d['misfire_grace_time'] = str(job.misfire_grace_time)
     d['max_instances'] = str(job.max_instances)
+    d['next_run_time'] = str(job.next_run_time)
     return d
