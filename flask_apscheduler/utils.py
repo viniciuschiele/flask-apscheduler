@@ -18,6 +18,8 @@ from collections import OrderedDict
 
 
 def job_to_dict(job):
+    """Converts a job to an OrderedDict."""
+
     d = OrderedDict()
     d['id'] = job.id
     d['func'] = job.func_ref

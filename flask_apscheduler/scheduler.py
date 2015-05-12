@@ -20,6 +20,8 @@ import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.util import obj_to_ref
 from apscheduler.util import ref_to_obj
+from flask import Flask
+from flask_apscheduler.exceptions import ConfigurationError
 from flask_apscheduler.views import get_job
 from flask_apscheduler.views import get_jobs
 from flask_apscheduler.views import run_job
@@ -29,7 +31,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class APScheduler(object):
-    """Scheduler that loads the jobs from Flask configuration."""
+    """Provides a scheduler integrated to Flask."""
 
     def __init__(self, scheduler=None, app=None):
         self.__scheduler = scheduler or BackgroundScheduler()
@@ -41,30 +43,39 @@ class APScheduler(object):
 
     @property
     def host_name(self):
+        """Gets the host name."""
         return self.__host_name
 
     @property
     def allowed_hosts(self):
+        """Gets the allowed hosts."""
         return self.__allowed_hosts
 
     @property
     def running(self):
+        """Gets true whether the scheduler is running."""
         return self.scheduler.running
 
     @property
     def scheduler(self):
+        """Gets the base scheduler."""
         return self.__scheduler
 
     def init_app(self, app):
-        if not app:
-            raise ValueError('app must be a Flask application')
+        """Initializes the APScheduler with a Flask application instance."""
+
+        if not isinstance(app, Flask):
+            raise TypeError('app must be a Flask application')
 
         app.apscheduler = self
 
         self.__load_config(app)
+        self.__load_jobs(app)
         self.__load_views(app)
 
     def start(self):
+        """Starts the scheduler."""
+
         if not self.allowed_hosts:
             LOGGER.debug('None server allowed to start the scheduler.')
 
@@ -76,9 +87,18 @@ class APScheduler(object):
         self.__scheduler.start()
 
     def shutdown(self, wait=True):
+        """
+        Shuts down the scheduler. Does not interrupt any currently running jobs.
+
+        :param bool wait: ``True`` to wait until all currently executing jobs have finished
+        :raises SchedulerNotRunningError: if the scheduler has not been started yet
+        """
+
         self.__scheduler.shutdown(wait)
 
     def __load_config(self, app):
+        """Loads the configuration from the Flask configuration."""
+
         options = dict()
 
         job_stores = app.config.get('SCHEDULER_JOBSTORES')
@@ -99,45 +119,64 @@ class APScheduler(object):
 
         self.__scheduler.configure(**options)
 
+        hosts = app.config.get('SCHEDULER_ALLOWED_HOSTS')
+        if hosts:
+            self.__allowed_hosts = hosts
+
+    def __load_jobs(self, app):
+        """Loads the job definitions from the Flask configuration."""
+
         jobs = app.config.get('SCHEDULER_JOBS')
 
         if jobs is None:
             jobs = app.config.get('JOBS')
 
-        for job in jobs:
-            self.__load_job(app, job)
+        if jobs:
+            for job in jobs:
+                self.__load_job(job, app)
 
-        hosts = app.config.get('SCHEDULER_ALLOWED_HOSTS')
-        if hosts:
-            self.__allowed_hosts = hosts
+    def __load_job(self, job, app):
+        """Schedule the specified job."""
 
-    def __load_job(self, app, job):
         def call_func(*args, **kwargs):
             with app.app_context():
                 func(*args, **kwargs)
 
+        id = job.get('id')
+
+        if id is None:
+            raise ConfigurationError('Job is missing the id.')
+
         func = job.get('func')
-        func_ref = None
+
+        if func is None:
+            raise ConfigurationError('Job %s is missing func.' % id)
 
         if isinstance(func, str):
-            func = ref_to_obj(func)
             func_ref = func
-
-        if callable(func):
+            func = ref_to_obj(func)
+        elif callable(func):
             func_ref = obj_to_ref(func)
+        else:
+            raise ConfigurationError('Job %s has an invalid func.' % id)
 
-        id = job.get('id')
         trigger = job.get('trigger')
+
+        if not trigger:
+            raise ConfigurationError('Job %s is missing the trigger.' % id)
+
+        trigger_type = trigger.pop('type', 'date')
+
         func_args = job.get('args')
         func_kwargs = job.get('kwargs')
-
-        trigger_type = trigger.pop('type')
 
         job = self.__scheduler.add_job(call_func, trigger_type, func_args, func_kwargs, id, **trigger)
         job.func_ref = func_ref
 
     @staticmethod
     def __load_views(app):
+        """Adds the routes for the scheduler UI."""
+
         app.add_url_rule('/scheduler', 'get_scheduler_info', get_scheduler_info)
         app.add_url_rule('/scheduler/jobs', 'get_jobs', get_jobs)
         app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', get_job)
