@@ -44,9 +44,10 @@ def run_job(job_id):
         return response
 
 
-def get_hosts():
+def get_scheduler_info():
     d = OrderedDict()
     d['current_host'] = app.apscheduler.host_name
     d['allowed_hosts'] = app.apscheduler.allowed_hosts
+    d['running'] = app.apscheduler.running
 
     return Response(json.dumps(d, indent=2), mimetype='application/json')

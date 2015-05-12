@@ -3,7 +3,7 @@ from flask_apscheduler import APScheduler
 
 
 class Config(object):
-    APSCHEDULER_JOBS = [
+    SCHEDULER_JOBS = [
         {
             'func': '__main__:job1',
             'args': (1, 2),

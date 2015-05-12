@@ -3,7 +3,7 @@ from flask_apscheduler import APScheduler
 
 
 class Config(object):
-    APSCHEDULER_JOBS = [
+    SCHEDULER_JOBS = [
         {
             'func': '__main__:job1',
             'args': (1, 2),
@@ -14,7 +14,7 @@ class Config(object):
         }
     ]
 
-    APSCHEDULER_ALLOWED_HOSTS = ['my_servers_name']
+    SCHEDULER_ALLOWED_HOSTS = ['my_servers_name']
 
 
 def job1(a, b):

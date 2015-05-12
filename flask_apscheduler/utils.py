@@ -24,7 +24,14 @@ def job_to_dict(job):
     d['args'] = str(job.args)
     d['kwargs'] = str(job.kwargs)
     d['trigger'] = str(job.trigger)
-    d['misfire_grace_time'] = str(job.misfire_grace_time)
-    d['max_instances'] = str(job.max_instances)
-    d['next_run_time'] = str(job.next_run_time)
+
+    if job.pending:
+        d['misfire_grace_time'] = 0
+        d['max_instances'] = 0
+        d['next_run_time'] = None
+    else:
+        d['misfire_grace_time'] = str(job.misfire_grace_time)
+        d['max_instances'] = str(job.max_instances)
+        d['next_run_time'] = str(job.next_run_time)
+
     return d
