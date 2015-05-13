@@ -145,12 +145,14 @@ class APScheduler(object):
         id = job.get('id')
 
         if id is None:
-            raise ConfigurationError('Job is missing the id.')
+            raise ConfigurationError('Job is missing the parameter id.')
+
+        name = job.get('name')
 
         func = job.get('func')
 
         if func is None:
-            raise ConfigurationError('Job %s is missing func.' % id)
+            raise ConfigurationError('Job %s is missing the parameter func.' % id)
 
         if isinstance(func, str):
             func_ref = func
@@ -158,19 +160,19 @@ class APScheduler(object):
         elif callable(func):
             func_ref = obj_to_ref(func)
         else:
-            raise ConfigurationError('Job %s has an invalid func.' % id)
+            raise ConfigurationError('Job %s has an invalid parameter func.' % id)
 
         trigger = job.get('trigger')
 
         if not trigger:
-            raise ConfigurationError('Job %s is missing the trigger.' % id)
+            raise ConfigurationError('Job %s is missing the parameter trigger.' % id)
 
         trigger_type = trigger.pop('type', 'date')
 
         func_args = job.get('args')
         func_kwargs = job.get('kwargs')
 
-        job = self.__scheduler.add_job(call_func, trigger_type, func_args, func_kwargs, id, **trigger)
+        job = self.__scheduler.add_job(call_func, trigger_type, func_args, func_kwargs, id, name, **trigger)
         job.func_ref = func_ref
 
     @staticmethod
