@@ -10,6 +10,7 @@ Features
 - Loads scheduler configuration from Flask configuration.
 - Loads job definitions from Flask configuration.
 - Allows to specify the hostname which the scheduler will run on.
+- Provides a http API to get and run the scheduled jobs.
 
 Documentation
 ===============
