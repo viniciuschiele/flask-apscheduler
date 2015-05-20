@@ -1,6 +1,6 @@
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from flask import Flask
 from flask_apscheduler import APScheduler
-
 
 class Config(object):
     JOBS = [
@@ -14,6 +14,19 @@ class Config(object):
             }
         }
     ]
+
+    APSCHEDULER_JOBSTORES = {
+        'default': SQLAlchemyJobStore(url='sqlite://')
+    }
+
+    APSCHEDULER_EXECUTORS = {
+        'default': {'type': 'threadpool', 'max_workers': 20}
+    }
+
+    SCHEDULER_JOB_DEFAULTS = {
+        'coalesce': False,
+        'max_instances': 3
+    }
 
 
 def job1(a, b):
