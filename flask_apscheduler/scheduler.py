@@ -21,13 +21,13 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.util import obj_to_ref
 from apscheduler.util import ref_to_obj
 from flask import Flask
-from flask_apscheduler.exceptions import ConfigurationError
-from flask_apscheduler.views import get_job
-from flask_apscheduler.views import get_jobs
-from flask_apscheduler.views import run_job
-from flask_apscheduler.views import get_scheduler_info
+from .exceptions import ConfigurationError
+from .views import get_job
+from .views import get_jobs
+from .views import run_job
+from .views import get_scheduler_info
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('flask_apscheduler')
 
 
 class APScheduler(object):
@@ -77,7 +77,7 @@ class APScheduler(object):
         """Starts the scheduler."""
 
         if not self.allowed_hosts:
-            LOGGER.debug('None server allowed to start the scheduler.')
+            LOGGER.debug('No server allowed to start the scheduler.')
 
         if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:
             LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
@@ -147,7 +147,7 @@ class APScheduler(object):
         if id is None:
             raise ConfigurationError('Job is missing the parameter id.')
 
-        name = job.get('name')
+        name = job.get('name') or id
 
         func = job.get('func')
 
