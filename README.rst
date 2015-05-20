@@ -18,7 +18,7 @@ Soon... take a look at the examples to see how it works.
 
 Installation
 ===============
-You can install Flask-APScheduler via Python Package Index (PyPI),::
+You can install Flask-APScheduler via Python Package Index (PyPI_),::
 
     $ pip install Flask-APScheduler
 
@@ -34,6 +34,8 @@ Please use the Issues_ for feature requests and troubleshooting usage.
    
 .. |License| image:: https://pypip.in/license/flask-apscheduler/badge.svg?
    :target: https://github.com/viniciuschiele/flask-apscheduler/blob/master/LICENSE
+
+.. _PyPi: https://pypi.python.org/pypi/Flask-APScheduler
 
 .. _Issues: https://github.com/viniciuschiele/flask-apscheduler/issues
 
