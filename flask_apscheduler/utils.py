@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Utilities module."""
+"""Utility module."""
 
 from collections import OrderedDict
 
@@ -20,17 +20,20 @@ from collections import OrderedDict
 def job_to_dict(job):
     """Converts a job to an OrderedDict."""
 
-    d = OrderedDict()
-    d['id'] = job.id
-    d['name'] = job.name
-    d['func'] = job.func_ref
-    d['args'] = str(job.args)
-    d['kwargs'] = str(job.kwargs)
-    d['trigger'] = str(job.trigger)
+    items = [
+        ('id', job.id),
+        ('name', job.name),
+        ('func', job.func_ref),
+        ('args', job.args),
+        ('kwargs', job.kwargs),
+        ('trigger', str(job.trigger))
+    ]
 
     if not job.pending:
-        d['misfire_grace_time'] = str(job.misfire_grace_time)
-        d['max_instances'] = str(job.max_instances)
-        d['next_run_time'] = str(job.next_run_time)
+        items += [
+            ('misfire_grace_time', str(job.misfire_grace_time)),
+            ('max_instances', str(job.max_instances)),
+            ('next_run_time', str(job.next_run_time))
+        ]
 
-    return d
+    return OrderedDict(items)
