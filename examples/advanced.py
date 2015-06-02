@@ -15,11 +15,11 @@ class Config(object):
         }
     ]
 
-    APSCHEDULER_JOBSTORES = {
+    SCHEDULER_JOBSTORES = {
         'default': SQLAlchemyJobStore(url='sqlite://')
     }
 
-    APSCHEDULER_EXECUTORS = {
+    SCHEDULER_EXECUTORS = {
         'default': {'type': 'threadpool', 'max_workers': 20}
     }
 
