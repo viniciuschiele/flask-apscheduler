@@ -1,0 +1,6 @@
+# Changelog
+
+### Version 1.1.0
+ - Added new configuration attribute called SCHEDULER_VIEWS_ENABLED, default is False.
+   From this version, the views are not loaded anymore by default.
+ - Added more parameters to the job definition.
