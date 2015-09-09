@@ -37,6 +37,7 @@ class APScheduler(object):
         self.__scheduler = scheduler or BackgroundScheduler()
         self.__allowed_hosts = ['*']
         self.__host_name = socket.gethostname().lower()
+        self.__views_enabled = False
 
         if app:
             self.init_app(app)
@@ -71,7 +72,9 @@ class APScheduler(object):
 
         self.__load_config(app)
         self.__load_jobs(app)
-        self.__load_views(app)
+
+        if self.__views_enabled:
+            self.__load_views(app)
 
     def start(self):
         """Starts the scheduler."""
@@ -119,9 +122,8 @@ class APScheduler(object):
 
         self.__scheduler.configure(**options)
 
-        hosts = app.config.get('SCHEDULER_ALLOWED_HOSTS')
-        if hosts:
-            self.__allowed_hosts = hosts
+        self.__allowed_hosts = app.config.get('SCHEDULER_ALLOWED_HOSTS', self.__allowed_hosts)
+        self.__views_enabled = app.config.get('SCHEDULER_VIEWS_ENABLED', self.__views_enabled)
 
     def __load_jobs(self, app):
         """Loads the job definitions from the Flask configuration."""
