@@ -18,8 +18,7 @@ import socket
 import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.util import obj_to_ref
-from apscheduler.util import ref_to_obj
+from apscheduler.util import obj_to_ref, ref_to_obj, undefined
 from flask import Flask
 from .exceptions import ConfigurationError
 from .views import get_job
@@ -169,12 +168,20 @@ class APScheduler(object):
         if not trigger:
             raise ConfigurationError('Job %s is missing the parameter trigger.' % id)
 
-        trigger_type = trigger.pop('type', 'date')
-
-        func_args = job.get('args')
-        func_kwargs = job.get('kwargs')
-
-        job = self.__scheduler.add_job(call_func, trigger_type, func_args, func_kwargs, id, name, **trigger)
+        job = self.__scheduler.add_job(call_func,
+                                       trigger.pop('type', 'date'),
+                                       job.get('args'),
+                                       job.get('kwargs'),
+                                       id,
+                                       name,
+                                       job.get('misfire_grace_time', undefined),
+                                       job.get('coalesce', undefined),
+                                       job.get('max_instances', undefined),
+                                       job.get('next_run_time', undefined),
+                                       job.get('jobstore', 'default'),
+                                       job.get('executor', 'default'),
+                                       job.get('replace_existing', False),
+                                       **trigger)
         job.func_ref = func_ref
 
     @staticmethod
