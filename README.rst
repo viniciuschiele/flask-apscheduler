@@ -3,7 +3,7 @@ Flask-APScheduler
 =================================
 Flask-APScheduler is a Flask extension which adds support for the APScheduler.
 
-|Version| |Downloads| |License|
+|Version|
 
 Features
 ===============
@@ -14,7 +14,7 @@ Features
 
 Documentation
 ===============
-Soon... take a look at the examples to see how it works.
+Soon... take a look at the examples_ to see how it works.
 
 Installation
 ===============
@@ -29,11 +29,7 @@ Please use the Issues_ for feature requests and troubleshooting usage.
 .. |Version| image:: https://badge.fury.io/py/flask-apscheduler.svg?
    :target: http://badge.fury.io/py/flask-apscheduler
 
-.. |Downloads| image:: https://pypip.in/d/flask-apscheduler/badge.svg?
-   :target: https://pypi.python.org/pypi/flask-apscheduler
-   
-.. |License| image:: https://pypip.in/license/flask-apscheduler/badge.svg?
-   :target: https://github.com/viniciuschiele/flask-apscheduler/blob/master/LICENSE
+.. _examples: https://github.com/viniciuschiele/flask-apscheduler/tree/master/examples
 
 .. _PyPi: https://pypi.python.org/pypi/Flask-APScheduler
 
