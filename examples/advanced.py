@@ -2,6 +2,7 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from flask import Flask
 from flask_apscheduler import APScheduler
 
+
 class Config(object):
     JOBS = [
         {
@@ -27,6 +28,8 @@ class Config(object):
         'coalesce': False,
         'max_instances': 3
     }
+
+    SCHEDULER_VIEWS_ENABLED = True
 
 
 def job1(a, b):

@@ -15,6 +15,8 @@ class Config(object):
         }
     ]
 
+    SCHEDULER_VIEWS_ENABLED = True
+
 
 def job1(a, b):
     print(str(a) + ' ' + str(b))

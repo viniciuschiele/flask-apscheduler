@@ -16,6 +16,7 @@ class Config(object):
     ]
 
     SCHEDULER_ALLOWED_HOSTS = ['my_servers_name']
+    SCHEDULER_VIEWS_ENABLED = True
 
 
 def job1(a, b):
