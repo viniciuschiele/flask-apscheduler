@@ -21,10 +21,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.util import obj_to_ref, ref_to_obj, undefined
 from flask import Flask
 from .exceptions import ConfigurationError
-from .views import get_job
-from .views import get_jobs
-from .views import run_job
-from .views import get_scheduler_info
+from .views import get_job, get_jobs, pause_job, resume_job, run_job, get_scheduler_info
 
 LOGGER = logging.getLogger('flask_apscheduler')
 
@@ -97,6 +94,32 @@ class APScheduler(object):
         """
 
         self.__scheduler.shutdown(wait)
+
+    def pause_job(self, job_id, jobstore=None):
+        """
+        Causes the given job not to be executed until it is explicitly resumed.
+
+        :param str|unicode job_id: the identifier of the job
+        :param str|unicode jobstore: alias of the job store that contains the job
+        """
+        self.__scheduler.pause_job(job_id, jobstore)
+
+    def resume_job(self, job_id, jobstore=None):
+        """
+        Resumes the schedule of the given job, or removes the job if its schedule is finished.
+
+        :param str|unicode job_id: the identifier of the job
+        :param str|unicode jobstore: alias of the job store that contains the job
+        """
+        self.__scheduler.resume_job(job_id, jobstore)
+
+    def run_job(self, job_id, jobstore=None):
+        job = self.__scheduler.get_job(job_id, jobstore)
+
+        if not job:
+            raise LookupError(job_id)
+
+        job.func(*job.args, **job.kwargs)
 
     def __load_config(self, app):
         """Loads the configuration from the Flask configuration."""
@@ -191,4 +214,6 @@ class APScheduler(object):
         app.add_url_rule('/scheduler', 'get_scheduler_info', get_scheduler_info)
         app.add_url_rule('/scheduler/jobs', 'get_jobs', get_jobs)
         app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', get_job)
+        app.add_url_rule('/scheduler/jobs/<job_id>/pause', 'pause_job', pause_job)
+        app.add_url_rule('/scheduler/jobs/<job_id>/resume', 'resume_job', resume_job)
         app.add_url_rule('/scheduler/jobs/<job_id>/run', 'run_job', run_job)
