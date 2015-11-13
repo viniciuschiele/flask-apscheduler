@@ -18,10 +18,9 @@ import socket
 import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.util import obj_to_ref, ref_to_obj, undefined
+from apscheduler.util import obj_to_ref, ref_to_obj
 from flask import Flask
-from .exceptions import ConfigurationError
-from .views import get_job, get_jobs, pause_job, resume_job, run_job, get_scheduler_info
+from . import views
 
 LOGGER = logging.getLogger('flask_apscheduler')
 
@@ -30,6 +29,7 @@ class APScheduler(object):
     """Provides a scheduler integrated to Flask."""
 
     def __init__(self, scheduler=None, app=None):
+        self.__app = None
         self.__scheduler = scheduler or BackgroundScheduler()
         self.__allowed_hosts = ['*']
         self.__host_name = socket.gethostname().lower()
@@ -64,13 +64,14 @@ class APScheduler(object):
         if not isinstance(app, Flask):
             raise TypeError('app must be a Flask application')
 
-        app.apscheduler = self
+        self.__app = app
+        self.__app.apscheduler = self
 
-        self.__load_config(app)
-        self.__load_jobs(app)
+        self.__load_config()
+        self.__load_jobs()
 
         if self.__views_enabled:
-            self.__load_views(app)
+            self.__load_views()
 
     def start(self):
         """Starts the scheduler."""
@@ -94,6 +95,36 @@ class APScheduler(object):
         """
 
         self.__scheduler.shutdown(wait)
+
+    def add_job(self, id, func, **kwargs):
+        def call_func(*a, **k):
+            with self.__app.app_context():
+                func(*a, **k)
+
+        if not id:
+            raise Exception('Argument id cannot be None.')
+
+        if not func:
+            raise Exception('Argument func cannot be None.')
+
+        if isinstance(func, str):
+            func_ref = func
+            func = ref_to_obj(func)
+        elif callable(func):
+            func_ref = obj_to_ref(func)
+        else:
+            raise Exception('Argument func must be a callable object or string.')
+
+        # it keeps compatibility backward
+        if isinstance(kwargs.get('trigger'), dict):
+            trigger = kwargs.pop('trigger')
+            kwargs['trigger'] = trigger.pop('type', 'date')
+            kwargs.update(trigger)
+
+        job = self.__scheduler.add_job(call_func, id=id, name=kwargs.get('name') or id, **kwargs)
+        job.func_ref = func_ref
+
+        return job
 
     def pause_job(self, job_id, jobstore=None):
         """
@@ -121,99 +152,51 @@ class APScheduler(object):
 
         job.func(*job.args, **job.kwargs)
 
-    def __load_config(self, app):
+    def __load_config(self):
         """Loads the configuration from the Flask configuration."""
 
         options = dict()
 
-        job_stores = app.config.get('SCHEDULER_JOBSTORES')
+        job_stores = self.__app.config.get('SCHEDULER_JOBSTORES')
         if job_stores:
             options['jobstores'] = job_stores
 
-        executors = app.config.get('SCHEDULER_EXECUTORS')
+        executors = self.__app.config.get('SCHEDULER_EXECUTORS')
         if executors:
             options['executors'] = executors
 
-        job_defaults = app.config.get('SCHEDULER_JOB_DEFAULTS')
+        job_defaults = self.__app.config.get('SCHEDULER_JOB_DEFAULTS')
         if job_defaults:
             options['job_defaults'] = job_defaults
 
-        timezone = app.config.get('SCHEDULER_TIMEZONE')
+        timezone = self.__app.config.get('SCHEDULER_TIMEZONE')
         if timezone:
             options['timezone'] = timezone
 
         self.__scheduler.configure(**options)
 
-        self.__allowed_hosts = app.config.get('SCHEDULER_ALLOWED_HOSTS', self.__allowed_hosts)
-        self.__views_enabled = app.config.get('SCHEDULER_VIEWS_ENABLED', self.__views_enabled)
+        self.__allowed_hosts = self.__app.config.get('SCHEDULER_ALLOWED_HOSTS', self.__allowed_hosts)
+        self.__views_enabled = self.__app.config.get('SCHEDULER_VIEWS_ENABLED', self.__views_enabled)
 
-    def __load_jobs(self, app):
+    def __load_jobs(self):
         """Loads the job definitions from the Flask configuration."""
 
-        jobs = app.config.get('SCHEDULER_JOBS')
+        jobs = self.__app.config.get('SCHEDULER_JOBS')
 
-        if jobs is None:
-            jobs = app.config.get('JOBS')
+        if not jobs:
+            jobs = self.__app.config.get('JOBS')
 
         if jobs:
             for job in jobs:
-                self.__load_job(job, app)
+                self.add_job(**job)
 
-    def __load_job(self, job, app):
-        """Schedule the specified job."""
-
-        def call_func(*args, **kwargs):
-            with app.app_context():
-                func(*args, **kwargs)
-
-        id = job.get('id')
-
-        if id is None:
-            raise ConfigurationError('Job is missing the parameter id.')
-
-        name = job.get('name') or id
-
-        func = job.get('func')
-
-        if func is None:
-            raise ConfigurationError('Job %s is missing the parameter func.' % id)
-
-        if isinstance(func, str):
-            func_ref = func
-            func = ref_to_obj(func)
-        elif callable(func):
-            func_ref = obj_to_ref(func)
-        else:
-            raise ConfigurationError('Job %s has an invalid parameter func.' % id)
-
-        trigger = job.get('trigger')
-
-        if not trigger:
-            raise ConfigurationError('Job %s is missing the parameter trigger.' % id)
-
-        job = self.__scheduler.add_job(call_func,
-                                       trigger.pop('type', 'date'),
-                                       job.get('args'),
-                                       job.get('kwargs'),
-                                       id,
-                                       name,
-                                       job.get('misfire_grace_time', undefined),
-                                       job.get('coalesce', undefined),
-                                       job.get('max_instances', undefined),
-                                       job.get('next_run_time', undefined),
-                                       job.get('jobstore', 'default'),
-                                       job.get('executor', 'default'),
-                                       job.get('replace_existing', False),
-                                       **trigger)
-        job.func_ref = func_ref
-
-    @staticmethod
-    def __load_views(app):
+    def __load_views(self):
         """Adds the routes for the scheduler UI."""
 
-        app.add_url_rule('/scheduler', 'get_scheduler_info', get_scheduler_info)
-        app.add_url_rule('/scheduler/jobs', 'get_jobs', get_jobs)
-        app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', get_job)
-        app.add_url_rule('/scheduler/jobs/<job_id>/pause', 'pause_job', pause_job)
-        app.add_url_rule('/scheduler/jobs/<job_id>/resume', 'resume_job', resume_job)
-        app.add_url_rule('/scheduler/jobs/<job_id>/run', 'run_job', run_job)
+        self.__app.add_url_rule('/scheduler', 'get_scheduler_info', views.get_scheduler_info)
+        self.__app.add_url_rule('/scheduler/jobs', 'add_job', views.add_job, methods=['POST'])
+        self.__app.add_url_rule('/scheduler/jobs', 'get_jobs', views.get_jobs)
+        self.__app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', views.get_job)
+        self.__app.add_url_rule('/scheduler/jobs/<job_id>/pause', 'pause_job', views.pause_job)
+        self.__app.add_url_rule('/scheduler/jobs/<job_id>/resume', 'resume_job', views.resume_job)
+        self.__app.add_url_rule('/scheduler/jobs/<job_id>/run', 'run_job', views.run_job)

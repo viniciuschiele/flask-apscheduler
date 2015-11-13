@@ -14,5 +14,4 @@
 
 """Flask extension for APScheduler."""
 
-from flask_apscheduler.exceptions import ConfigurationError
 from flask_apscheduler.scheduler import APScheduler

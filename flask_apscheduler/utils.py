@@ -14,7 +14,10 @@
 
 """Utility module."""
 
+import json
+
 from collections import OrderedDict
+from flask import Response
 
 
 def job_to_dict(job):
@@ -37,3 +40,7 @@ def job_to_dict(job):
         ]
 
     return OrderedDict(items)
+
+
+def jsonify(data):
+    return Response(json.dumps(data, indent=2),  mimetype='application/json')
