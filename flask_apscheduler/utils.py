@@ -42,5 +42,5 @@ def job_to_dict(job):
     return OrderedDict(items)
 
 
-def jsonify(data):
-    return Response(json.dumps(data, indent=2),  mimetype='application/json')
+def jsonify(data, status=None):
+    return Response(json.dumps(data, indent=2), status=status, mimetype='application/json')

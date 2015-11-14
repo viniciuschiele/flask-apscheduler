@@ -14,9 +14,9 @@
 
 import json
 
-from apscheduler.jobstores.base import JobLookupError
+from apscheduler.jobstores.base import ConflictingIdError, JobLookupError
 from collections import OrderedDict
-from flask import current_app, request
+from flask import current_app, request, Response
 from .utils import job_to_dict, jsonify
 
 
@@ -37,15 +37,28 @@ def get_scheduler_info():
 def add_job():
     """Adds a new job."""
 
+    data = request.get_data(as_text=True)
+
     try:
-        data = request.get_data(as_text=True)
         data = json.loads(data)
-
         job = current_app.apscheduler.add_job(**data)
-
         return jsonify(job_to_dict(job))
+    except ConflictingIdError:
+        return jsonify(dict(error_message='Job %s already exists.' % data.get('id')), status=409)
     except Exception as e:
-        return jsonify(dict(error_message=str(e))), 400
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
+def delete_job(job_id):
+    """Deletes the specified job."""
+
+    try:
+        current_app.apscheduler.delete_job(job_id)
+        return Response(status=204)
+    except JobLookupError:
+        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
 
 
 def get_job(job_id):
@@ -54,7 +67,7 @@ def get_job(job_id):
     job = current_app.apscheduler.scheduler.get_job(job_id)
 
     if not job:
-        return jsonify(dict(error_message='Job %s not found' % job_id)), 404
+        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
 
     return jsonify(job_to_dict(job))
 
@@ -80,9 +93,9 @@ def pause_job(job_id):
         job = current_app.apscheduler.scheduler.get_job(job_id)
         return jsonify(job_to_dict(job))
     except JobLookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id)), 404
+        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
     except Exception as e:
-        return jsonify(dict(error_message=str(e))), 500
+        return jsonify(dict(error_message=str(e)), status=500)
 
 
 def resume_job(job_id):
@@ -93,9 +106,9 @@ def resume_job(job_id):
         job = current_app.apscheduler.scheduler.get_job(job_id)
         return jsonify(job_to_dict(job))
     except JobLookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id)), 404
+        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
     except Exception as e:
-        return jsonify(dict(error_message=str(e))), 500
+        return jsonify(dict(error_message=str(e)), status=500)
 
 
 def run_job(job_id):
@@ -106,6 +119,6 @@ def run_job(job_id):
         job = current_app.apscheduler.scheduler.get_job(job_id)
         return jsonify(job_to_dict(job))
     except LookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id)), 404
+        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
     except Exception as e:
-        return jsonify(dict(error_message=str(e))), 500
+        return jsonify(dict(error_message=str(e)), status=500)

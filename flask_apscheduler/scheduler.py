@@ -97,6 +97,13 @@ class APScheduler(object):
         self.__scheduler.shutdown(wait)
 
     def add_job(self, id, func, **kwargs):
+        """
+        Adds the given job to the job list and wakes up the scheduler if it's already running.
+
+        :param str id: explicit identifier for the job (for modifying it later)
+        :param func: callable (or a textual reference to one) to run at the given time
+        """
+
         def call_func(*a, **k):
             with self.__app.app_context():
                 func(*a, **k)
@@ -126,12 +133,21 @@ class APScheduler(object):
 
         return job
 
+    def delete_job(self, job_id):
+        """
+        Removes a job, preventing it from being run any more.
+
+        :param str job_id: the identifier of the job
+        """
+
+        self.__scheduler.remove_job(job_id)
+
     def pause_job(self, job_id, jobstore=None):
         """
         Causes the given job not to be executed until it is explicitly resumed.
 
-        :param str|unicode job_id: the identifier of the job
-        :param str|unicode jobstore: alias of the job store that contains the job
+        :param str job_id: the identifier of the job
+        :param str jobstore: alias of the job store that contains the job
         """
         self.__scheduler.pause_job(job_id, jobstore)
 
@@ -139,8 +155,8 @@ class APScheduler(object):
         """
         Resumes the schedule of the given job, or removes the job if its schedule is finished.
 
-        :param str|unicode job_id: the identifier of the job
-        :param str|unicode jobstore: alias of the job store that contains the job
+        :param str job_id: the identifier of the job
+        :param str jobstore: alias of the job store that contains the job
         """
         self.__scheduler.resume_job(job_id, jobstore)
 
@@ -197,6 +213,7 @@ class APScheduler(object):
         self.__app.add_url_rule('/scheduler/jobs', 'add_job', views.add_job, methods=['POST'])
         self.__app.add_url_rule('/scheduler/jobs', 'get_jobs', views.get_jobs)
         self.__app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', views.get_job)
+        self.__app.add_url_rule('/scheduler/jobs/<job_id>', 'delete_job', views.delete_job, methods=['DELETE'])
         self.__app.add_url_rule('/scheduler/jobs/<job_id>/pause', 'pause_job', views.pause_job)
         self.__app.add_url_rule('/scheduler/jobs/<job_id>/resume', 'resume_job', views.resume_job)
         self.__app.add_url_rule('/scheduler/jobs/<job_id>/run', 'run_job', views.run_job)
