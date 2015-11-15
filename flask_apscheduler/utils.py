@@ -44,3 +44,11 @@ def job_to_dict(job):
 
 def jsonify(data, status=None):
     return Response(json.dumps(data, indent=2), status=status, mimetype='application/json')
+
+
+def fix_job_def(job_def):
+    # it keeps compatibility backward
+    if isinstance(job_def.get('trigger'), dict):
+        trigger = job_def.pop('trigger')
+        job_def['trigger'] = trigger.pop('type', 'date')
+        job_def.update(trigger)

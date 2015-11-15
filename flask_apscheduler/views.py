@@ -50,7 +50,7 @@ def add_job():
 
 
 def delete_job(job_id):
-    """Deletes the specified job."""
+    """Deletes a job."""
 
     try:
         current_app.apscheduler.delete_job(job_id)
@@ -62,7 +62,7 @@ def delete_job(job_id):
 
 
 def get_job(job_id):
-    """Gets the specified job."""
+    """Gets a job."""
 
     job = current_app.apscheduler.scheduler.get_job(job_id)
 
@@ -73,7 +73,7 @@ def get_job(job_id):
 
 
 def get_jobs():
-    """Gets all jobs scheduled."""
+    """Gets all scheduled jobs."""
 
     jobs = current_app.apscheduler.scheduler.get_jobs()
 
@@ -85,8 +85,23 @@ def get_jobs():
     return jsonify(job_states)
 
 
+def update_job(job_id):
+    """Updates a job."""
+
+    data = request.get_data(as_text=True)
+
+    try:
+        data = json.loads(data)
+        job = current_app.apscheduler.modify_job(job_id, **data)
+        return jsonify(job_to_dict(job))
+    except JobLookupError:
+        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
 def pause_job(job_id):
-    """Pauses the specified job."""
+    """Pauses a job."""
 
     try:
         current_app.apscheduler.pause_job(job_id)
@@ -99,7 +114,7 @@ def pause_job(job_id):
 
 
 def resume_job(job_id):
-    """Resumes the specified job."""
+    """Resumes a job."""
 
     try:
         current_app.apscheduler.resume_job(job_id)
@@ -112,7 +127,7 @@ def resume_job(job_id):
 
 
 def run_job(job_id):
-    """Executes the specified job."""
+    """Executes a job."""
 
     try:
         current_app.apscheduler.run_job(job_id)

@@ -14,13 +14,13 @@
 
 """APScheduler implementation."""
 
-import socket
 import logging
+import socket
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.util import obj_to_ref, ref_to_obj
 from flask import Flask
 from . import views
+from .utils import fix_job_def
 
 LOGGER = logging.getLogger('flask_apscheduler')
 
@@ -29,11 +29,12 @@ class APScheduler(object):
     """Provides a scheduler integrated to Flask."""
 
     def __init__(self, scheduler=None, app=None):
-        self.__app = None
         self.__scheduler = scheduler or BackgroundScheduler()
         self.__allowed_hosts = ['*']
         self.__host_name = socket.gethostname().lower()
         self.__views_enabled = False
+
+        self.app = None
 
         if app:
             self.init_app(app)
@@ -64,8 +65,8 @@ class APScheduler(object):
         if not isinstance(app, Flask):
             raise TypeError('app must be a Flask application')
 
-        self.__app = app
-        self.__app.apscheduler = self
+        self.app = app
+        self.app.apscheduler = self
 
         self.__load_config()
         self.__load_jobs()
@@ -100,13 +101,9 @@ class APScheduler(object):
         """
         Adds the given job to the job list and wakes up the scheduler if it's already running.
 
-        :param str id: explicit identifier for the job (for modifying it later)
+        :param str job_id: explicit identifier for the job (for modifying it later)
         :param func: callable (or a textual reference to one) to run at the given time
         """
-
-        def call_func(*a, **k):
-            with self.__app.app_context():
-                func(*a, **k)
 
         if not id:
             raise Exception('Argument id cannot be None.')
@@ -114,57 +111,67 @@ class APScheduler(object):
         if not func:
             raise Exception('Argument func cannot be None.')
 
-        if isinstance(func, str):
-            func_ref = func
-            func = ref_to_obj(func)
-        elif callable(func):
-            func_ref = obj_to_ref(func)
-        else:
-            raise Exception('Argument func must be a callable object or string.')
+        name = kwargs.get('name') or id
 
-        # it keeps compatibility backward
-        if isinstance(kwargs.get('trigger'), dict):
-            trigger = kwargs.pop('trigger')
-            kwargs['trigger'] = trigger.pop('type', 'date')
-            kwargs.update(trigger)
+        fix_job_def(kwargs)
 
-        job = self.__scheduler.add_job(call_func, id=id, name=kwargs.get('name') or id, **kwargs)
-        job.func_ref = func_ref
+        job = self.__scheduler.add_job(func, id=id, name=name, **kwargs)
 
         return job
 
-    def delete_job(self, job_id):
+    def delete_job(self, id, jobstore=None):
         """
         Removes a job, preventing it from being run any more.
 
-        :param str job_id: the identifier of the job
+        :param str id: the identifier of the job
+        :param str jobstore: alias of the job store that contains the job
         """
 
-        self.__scheduler.remove_job(job_id)
+        self.__scheduler.remove_job(id, jobstore)
 
-    def pause_job(self, job_id, jobstore=None):
+    def modify_job(self, id, jobstore=None, **kwargs):
+        """
+        Modifies the properties of a single job. Modifications are passed to this method as extra keyword arguments.
+
+        :param str id: the identifier of the job
+        :param str jobstore: alias of the job store that contains the job
+        """
+
+        if not id:
+            raise Exception('Argument id cannot be None or empty.')
+
+        fix_job_def(kwargs)
+
+        self.__scheduler.modify_job(id, jobstore, **kwargs)
+
+        job = self.__scheduler.get_job(id, jobstore)
+
+        return job
+
+    def pause_job(self, id, jobstore=None):
         """
         Causes the given job not to be executed until it is explicitly resumed.
 
-        :param str job_id: the identifier of the job
+        :param str id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
         """
-        self.__scheduler.pause_job(job_id, jobstore)
 
-    def resume_job(self, job_id, jobstore=None):
+        self.__scheduler.pause_job(id, jobstore)
+
+    def resume_job(self, id, jobstore=None):
         """
         Resumes the schedule of the given job, or removes the job if its schedule is finished.
 
-        :param str job_id: the identifier of the job
+        :param str id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
         """
-        self.__scheduler.resume_job(job_id, jobstore)
+        self.__scheduler.resume_job(id, jobstore)
 
-    def run_job(self, job_id, jobstore=None):
-        job = self.__scheduler.get_job(job_id, jobstore)
+    def run_job(self, id, jobstore=None):
+        job = self.__scheduler.get_job(id, jobstore)
 
         if not job:
-            raise LookupError(job_id)
+            raise LookupError(id)
 
         job.func(*job.args, **job.kwargs)
 
@@ -173,34 +180,34 @@ class APScheduler(object):
 
         options = dict()
 
-        job_stores = self.__app.config.get('SCHEDULER_JOBSTORES')
+        job_stores = self.app.config.get('SCHEDULER_JOBSTORES')
         if job_stores:
             options['jobstores'] = job_stores
 
-        executors = self.__app.config.get('SCHEDULER_EXECUTORS')
+        executors = self.app.config.get('SCHEDULER_EXECUTORS')
         if executors:
             options['executors'] = executors
 
-        job_defaults = self.__app.config.get('SCHEDULER_JOB_DEFAULTS')
+        job_defaults = self.app.config.get('SCHEDULER_JOB_DEFAULTS')
         if job_defaults:
             options['job_defaults'] = job_defaults
 
-        timezone = self.__app.config.get('SCHEDULER_TIMEZONE')
+        timezone = self.app.config.get('SCHEDULER_TIMEZONE')
         if timezone:
             options['timezone'] = timezone
 
         self.__scheduler.configure(**options)
 
-        self.__allowed_hosts = self.__app.config.get('SCHEDULER_ALLOWED_HOSTS', self.__allowed_hosts)
-        self.__views_enabled = self.__app.config.get('SCHEDULER_VIEWS_ENABLED', self.__views_enabled)
+        self.__allowed_hosts = self.app.config.get('SCHEDULER_ALLOWED_HOSTS', self.__allowed_hosts)
+        self.__views_enabled = self.app.config.get('SCHEDULER_VIEWS_ENABLED', self.__views_enabled)
 
     def __load_jobs(self):
         """Loads the job definitions from the Flask configuration."""
 
-        jobs = self.__app.config.get('SCHEDULER_JOBS')
+        jobs = self.app.config.get('SCHEDULER_JOBS')
 
         if not jobs:
-            jobs = self.__app.config.get('JOBS')
+            jobs = self.app.config.get('JOBS')
 
         if jobs:
             for job in jobs:
@@ -209,11 +216,12 @@ class APScheduler(object):
     def __load_views(self):
         """Adds the routes for the scheduler UI."""
 
-        self.__app.add_url_rule('/scheduler', 'get_scheduler_info', views.get_scheduler_info)
-        self.__app.add_url_rule('/scheduler/jobs', 'add_job', views.add_job, methods=['POST'])
-        self.__app.add_url_rule('/scheduler/jobs', 'get_jobs', views.get_jobs)
-        self.__app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', views.get_job)
-        self.__app.add_url_rule('/scheduler/jobs/<job_id>', 'delete_job', views.delete_job, methods=['DELETE'])
-        self.__app.add_url_rule('/scheduler/jobs/<job_id>/pause', 'pause_job', views.pause_job)
-        self.__app.add_url_rule('/scheduler/jobs/<job_id>/resume', 'resume_job', views.resume_job)
-        self.__app.add_url_rule('/scheduler/jobs/<job_id>/run', 'run_job', views.run_job)
+        self.app.add_url_rule('/scheduler', 'get_scheduler_info', views.get_scheduler_info)
+        self.app.add_url_rule('/scheduler/jobs', 'add_job', views.add_job, methods=['POST'])
+        self.app.add_url_rule('/scheduler/jobs', 'get_jobs', views.get_jobs)
+        self.app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', views.get_job)
+        self.app.add_url_rule('/scheduler/jobs/<job_id>', 'delete_job', views.delete_job, methods=['DELETE'])
+        self.app.add_url_rule('/scheduler/jobs/<job_id>', 'update_job', views.update_job, methods=['PATCH'])
+        self.app.add_url_rule('/scheduler/jobs/<job_id>/pause', 'pause_job', views.pause_job)
+        self.app.add_url_rule('/scheduler/jobs/<job_id>/resume', 'resume_job', views.resume_job)
+        self.app.add_url_rule('/scheduler/jobs/<job_id>/run', 'run_job', views.run_job)
