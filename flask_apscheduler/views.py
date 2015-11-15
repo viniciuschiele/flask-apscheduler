@@ -45,6 +45,8 @@ def add_job():
         return jsonify(job_to_dict(job))
     except ConflictingIdError:
         return jsonify(dict(error_message='Job %s already exists.' % data.get('id')), status=409)
+    except LookupError as e:
+        return jsonify(dict(error_message=str(e)), status=400)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
 
