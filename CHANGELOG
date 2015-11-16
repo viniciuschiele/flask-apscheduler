@@ -1,5 +1,12 @@
 # Changelog
 
+### Version 1.2.0
+ - Added REST API to add a new job
+ - Added REST API to delete a job
+ - Added REST API to update a job
+ - Added REST API to pause a job
+ - Added REST API to resume a job
+
 ### Version 1.1.0
  - Added new configuration attribute called SCHEDULER_VIEWS_ENABLED, default is False.
    From this version, the views are not loaded anymore by default.
