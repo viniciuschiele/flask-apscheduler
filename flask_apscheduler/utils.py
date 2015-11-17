@@ -15,7 +15,11 @@
 """Utility module."""
 
 import json
+import dateutil.parser
 
+from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.date import DateTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 from collections import OrderedDict
 from flask import Response
 
@@ -23,23 +27,66 @@ from flask import Response
 def job_to_dict(job):
     """Converts a job to an OrderedDict."""
 
-    items = [
-        ('id', job.id),
-        ('name', job.name),
-        ('func', job.func_ref),
-        ('args', job.args),
-        ('kwargs', job.kwargs),
-        ('trigger', str(job.trigger))
-    ]
+    data = OrderedDict()
+    data['id'] = job.id
+    data['name'] = job.name
+    data['func'] = job.func_ref
+    data['args'] = job.args
+    data['kwargs'] = job.kwargs
+
+    data.update(trigger_to_dict(job.trigger))
 
     if not job.pending:
-        items += [
-            ('misfire_grace_time', str(job.misfire_grace_time)),
-            ('max_instances', str(job.max_instances)),
-            ('next_run_time', str(job.next_run_time))
-        ]
+        data['misfire_grace_time'] = job.misfire_grace_time
+        data['max_instances'] = job.max_instances
+        data['next_run_time'] = job.next_run_time.isoformat()
 
-    return OrderedDict(items)
+    return data
+
+
+def trigger_to_dict(trigger):
+    """Converts a trigger to an OrderedDict."""
+
+    data = OrderedDict()
+
+    if isinstance(trigger, DateTrigger):
+        data['trigger'] = 'date'
+        data['run_date'] = trigger.run_date.isoformat()
+    elif isinstance(trigger, IntervalTrigger):
+        data['trigger'] = 'interval'
+        data['start_date'] = trigger.start_date.isoformat()
+
+        if trigger.end_date:
+            data['end_date'] = trigger.end_date.isoformat()
+
+        w, d, hh, mm, ss = extract_timedelta(trigger.interval)
+
+        if w > 0:
+            data['weeks'] = w
+        if d > 0:
+            data['days'] = d
+        if hh > 0:
+            data['hours'] = hh
+        if mm > 0:
+            data['minutes'] = mm
+        if ss > 0:
+            data['seconds'] = ss
+    elif isinstance(trigger, CronTrigger):
+        data['trigger'] = 'cron'
+
+        if trigger.start_date:
+            data['start_date'] = trigger.start_date.isoformat()
+
+        if trigger.end_date:
+            data['end_date'] = trigger.end_date.isoformat()
+
+        for field in trigger.fields:
+            if not field.is_default:
+                data[field.name] = int(str(field))
+    else:
+        data['trigger'] = str(trigger)
+
+    return data
 
 
 def jsonify(data, status=None):
@@ -47,8 +94,24 @@ def jsonify(data, status=None):
 
 
 def fix_job_def(job_def):
+    if isinstance(job_def.get('start_date'), str):
+        job_def['start_date'] = dateutil.parser.parse(job_def.get('start_date'))
+
+    if isinstance(job_def.get('end_date'), str):
+        job_def['end_date'] = dateutil.parser.parse(job_def.get('end_date'))
+
+    if isinstance(job_def.get('run_date'), str):
+        job_def['run_date'] = dateutil.parser.parse(job_def.get('run_date'))
+
     # it keeps compatibility backward
     if isinstance(job_def.get('trigger'), dict):
         trigger = job_def.pop('trigger')
         job_def['trigger'] = trigger.pop('type', 'date')
         job_def.update(trigger)
+
+
+def extract_timedelta(delta):
+    w, d = divmod(delta.days, 7)
+    mm, ss = divmod(delta.seconds, 60)
+    hh, mm = divmod(mm, 60)
+    return w, d, hh, mm, ss
