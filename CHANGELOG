@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.2.1
+ - Improved serialization and deserialization of triggers
+
 ### Version 1.2.0
  - Added REST API to add a new job
  - Added REST API to delete a job
