@@ -39,7 +39,7 @@ def job_to_dict(job):
     if not job.pending:
         data['misfire_grace_time'] = job.misfire_grace_time
         data['max_instances'] = job.max_instances
-        data['next_run_time'] = job.next_run_time.isoformat()
+        data['next_run_time'] = None if job.next_run_time is None else job.next_run_time.isoformat()
 
     return data
 
