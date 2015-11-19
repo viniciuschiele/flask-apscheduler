@@ -40,7 +40,7 @@ class TestViews(TestCase):
         response = self.client.get('/scheduler/jobs/job1')
         self.assertEqual(response.status_code, 404)
 
-    def test_get(self):
+    def test_get_job(self):
         job = self.__add_job()
 
         response = self.client.get('/scheduler/jobs/job1')
@@ -53,7 +53,7 @@ class TestViews(TestCase):
         self.assertEqual(job.get('trigger'), job2.get('trigger'))
         self.assertEqual(job.get('minutes'), job2.get('minutes'))
 
-    def test_get_all(self):
+    def test_get_all_jobs(self):
         job = self.__add_job()
 
         response = self.client.get('/scheduler/jobs')
@@ -70,7 +70,7 @@ class TestViews(TestCase):
         self.assertEqual(job.get('trigger'), job2.get('trigger'))
         self.assertEqual(job.get('minutes'), job2.get('minutes'))
 
-    def test_update(self):
+    def test_update_job(self):
         job = self.__add_job()
 
         data_to_update = {
@@ -87,6 +87,19 @@ class TestViews(TestCase):
         self.assertEqual(data_to_update.get('args'), job2.get('args'))
         self.assertEqual(job.get('trigger'), job2.get('trigger'))
         self.assertEqual(job.get('minutes'), job2.get('minutes'))
+
+    def test_pause_and_resume_job(self):
+        self.__add_job()
+
+        response = self.client.post('/scheduler/jobs/job1/pause')
+        self.assertEqual(response.status_code, 200)
+        job = json.loads(response.get_data(as_text=True))
+        self.assertIsNone(job.get('next_run_time'))
+
+        response = self.client.post('/scheduler/jobs/job1/resume')
+        self.assertEqual(response.status_code, 200)
+        job = json.loads(response.get_data(as_text=True))
+        self.assertIsNotNone(job.get('next_run_time'))
 
     def __add_job(self):
         job = {
