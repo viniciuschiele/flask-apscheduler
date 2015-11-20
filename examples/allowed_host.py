@@ -8,10 +8,8 @@ class Config(object):
             'id': 'job1',
             'func': '__main__:job1',
             'args': (1, 2),
-            'trigger': {
-                'type': 'cron',
-                'second': 10
-            }
+            'trigger': 'interval',
+            'seconds': 10
         }
     ]
 
