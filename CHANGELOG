@@ -1,5 +1,9 @@
 # Changelog
 
+### Version 1.3.0
+ - Changed APIs Pause, Resume and Run to execute only with HTTP POST
+ - Bug fixed
+
 ### Version 1.2.1
  - Improved serialization and deserialization of triggers
 
