@@ -14,8 +14,9 @@
 
 """Utility module."""
 
-import json
 import dateutil.parser
+import json
+import six
 
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
@@ -94,13 +95,13 @@ def jsonify(data, status=None):
 
 
 def fix_job_def(job_def):
-    if isinstance(job_def.get('start_date'), str):
+    if isinstance(job_def.get('start_date'), six.string_types):
         job_def['start_date'] = dateutil.parser.parse(job_def.get('start_date'))
 
-    if isinstance(job_def.get('end_date'), str):
+    if isinstance(job_def.get('end_date'), six.string_types):
         job_def['end_date'] = dateutil.parser.parse(job_def.get('end_date'))
 
-    if isinstance(job_def.get('run_date'), str):
+    if isinstance(job_def.get('run_date'), six.string_types):
         job_def['run_date'] = dateutil.parser.parse(job_def.get('run_date'))
 
     # it keeps compatibility backward
@@ -108,6 +109,9 @@ def fix_job_def(job_def):
         trigger = job_def.pop('trigger')
         job_def['trigger'] = trigger.pop('type', 'date')
         job_def.update(trigger)
+
+    if isinstance(job_def.get('func'), six.string_types) and six.PY2:
+        job_def['func'] = str(job_def['func'])
 
 
 def extract_timedelta(delta):

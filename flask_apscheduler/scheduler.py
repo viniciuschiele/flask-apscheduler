@@ -101,7 +101,7 @@ class APScheduler(object):
         """
         Adds the given job to the job list and wakes up the scheduler if it's already running.
 
-        :param str job_id: explicit identifier for the job (for modifying it later)
+        :param str id: explicit identifier for the job (for modifying it later)
         :param func: callable (or a textual reference to one) to run at the given time
         """
 
@@ -111,11 +111,14 @@ class APScheduler(object):
         if not func:
             raise Exception('Argument func cannot be None.')
 
-        name = kwargs.get('name') or id
+        job_def = dict(kwargs)
+        job_def['id'] = id
+        job_def['func'] = func
+        job_def['name'] = job_def.get('name') or id
 
-        fix_job_def(kwargs)
+        fix_job_def(job_def)
 
-        job = self.__scheduler.add_job(func, id=id, name=name, **kwargs)
+        job = self.__scheduler.add_job(**job_def)
 
         return job
 
@@ -129,7 +132,7 @@ class APScheduler(object):
 
         self.__scheduler.remove_job(id, jobstore)
 
-    def modify_job(self, id, jobstore=None, **kwargs):
+    def modify_job(self, id, jobstore=None, **changes):
         """
         Modifies the properties of a single job. Modifications are passed to this method as extra keyword arguments.
 
@@ -140,9 +143,9 @@ class APScheduler(object):
         if not id:
             raise Exception('Argument id cannot be None or empty.')
 
-        fix_job_def(kwargs)
+        fix_job_def(changes)
 
-        self.__scheduler.modify_job(id, jobstore, **kwargs)
+        self.__scheduler.modify_job(id, jobstore, **changes)
 
         job = self.__scheduler.get_job(id, jobstore)
 
