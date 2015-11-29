@@ -83,7 +83,7 @@ def trigger_to_dict(trigger):
 
         for field in trigger.fields:
             if not field.is_default:
-                data[field.name] = int(str(field))
+                data[field.name] = str(field)
     else:
         data['trigger'] = str(trigger)
 
