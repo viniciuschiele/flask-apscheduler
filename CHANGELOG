@@ -1,23 +1,26 @@
 # Changelog
 
+### Version 1.3.2
+ - Bug fix
+
 ### Version 1.3.1
  - Made compatible with python 2.7
 
 ### Version 1.3.0
- - Changed APIs Pause, Resume and Run to execute only with HTTP POST
- - Bug fixed
+ - Change APIs Pause, Resume and Run to execute only with HTTP POST
+ - Bug fix
 
 ### Version 1.2.1
- - Improved serialization and deserialization of triggers
+ - Improve serialization and deserialization of triggers
 
 ### Version 1.2.0
- - Added REST API to add a new job
- - Added REST API to delete a job
- - Added REST API to update a job
- - Added REST API to pause a job
- - Added REST API to resume a job
+ - Add REST API to add a new job
+ - Add REST API to delete a job
+ - Add REST API to update a job
+ - Add REST API to pause a job
+ - Add REST API to resume a job
 
 ### Version 1.1.0
- - Added new configuration attribute called SCHEDULER_VIEWS_ENABLED, default is False.
+ - Add new configuration attribute called SCHEDULER_VIEWS_ENABLED, default is False.
    From this version, the views are not loaded anymore by default.
- - Added more parameters to the job definition.
+ - Add more parameters to the job definition.
