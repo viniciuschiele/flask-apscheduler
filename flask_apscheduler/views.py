@@ -37,10 +37,9 @@ def get_scheduler_info():
 def add_job():
     """Adds a new job."""
 
-    data = request.get_data(as_text=True)
+    data = request.get_json(force=True)
 
     try:
-        data = json.loads(data)
         job = current_app.apscheduler.add_job(**data)
         return jsonify(job_to_dict(job))
     except ConflictingIdError:
@@ -90,10 +89,9 @@ def get_jobs():
 def update_job(job_id):
     """Updates a job."""
 
-    data = request.get_data(as_text=True)
+    data = request.get_json(force=True)
 
     try:
-        data = json.loads(data)
         job = current_app.apscheduler.modify_job(job_id, **data)
         return jsonify(job_to_dict(job))
     except JobLookupError:
