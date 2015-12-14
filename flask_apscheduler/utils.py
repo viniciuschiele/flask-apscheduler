@@ -110,9 +110,6 @@ def fix_job_def(job_def):
         job_def['trigger'] = trigger.pop('type', 'date')
         job_def.update(trigger)
 
-    if isinstance(job_def.get('func'), six.string_types) and six.PY2:
-        job_def['func'] = str(job_def['func'])
-
 
 def extract_timedelta(delta):
     w, d = divmod(delta.days, 7)

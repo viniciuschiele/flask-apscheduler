@@ -10,7 +10,7 @@ setup(
     author_email='vinicius.chiele@gmail.com',
     description='Adds APScheduler support to Flask',
     keywords=['apscheduler', 'scheduler', 'scheduling', 'cron'],
-    install_requires=['flask>=0.10.1', 'apscheduler==3.0.4', 'python-dateutil==2.4.2'],
+    install_requires=['flask>=0.10.1', 'apscheduler==3.0.5', 'python-dateutil==2.4.2'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
