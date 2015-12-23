@@ -32,7 +32,7 @@ def job_to_dict(job):
     data['id'] = job.id
     data['name'] = job.name
     data['func'] = job.func_ref
-    data['args'] = job.args
+    data['args'] = str(job.args) #To make jsonify work with datetime
     data['kwargs'] = job.kwargs
 
     data.update(trigger_to_dict(job.trigger))
