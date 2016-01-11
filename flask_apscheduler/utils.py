@@ -15,14 +15,12 @@
 """Utility module."""
 
 import dateutil.parser
-import json
 import six
 
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 from collections import OrderedDict
-from flask import Response
 
 
 def job_to_dict(job):
@@ -40,7 +38,7 @@ def job_to_dict(job):
     if not job.pending:
         data['misfire_grace_time'] = job.misfire_grace_time
         data['max_instances'] = job.max_instances
-        data['next_run_time'] = None if job.next_run_time is None else job.next_run_time.isoformat()
+        data['next_run_time'] = None if job.next_run_time is None else job.next_run_time
 
     return data
 
@@ -52,13 +50,13 @@ def trigger_to_dict(trigger):
 
     if isinstance(trigger, DateTrigger):
         data['trigger'] = 'date'
-        data['run_date'] = trigger.run_date.isoformat()
+        data['run_date'] = trigger.run_date
     elif isinstance(trigger, IntervalTrigger):
         data['trigger'] = 'interval'
-        data['start_date'] = trigger.start_date.isoformat()
+        data['start_date'] = trigger.start_date
 
         if trigger.end_date:
-            data['end_date'] = trigger.end_date.isoformat()
+            data['end_date'] = trigger.end_date
 
         w, d, hh, mm, ss = extract_timedelta(trigger.interval)
 
@@ -76,10 +74,10 @@ def trigger_to_dict(trigger):
         data['trigger'] = 'cron'
 
         if trigger.start_date:
-            data['start_date'] = trigger.start_date.isoformat()
+            data['start_date'] = trigger.start_date
 
         if trigger.end_date:
-            data['end_date'] = trigger.end_date.isoformat()
+            data['end_date'] = trigger.end_date
 
         for field in trigger.fields:
             if not field.is_default:
@@ -88,10 +86,6 @@ def trigger_to_dict(trigger):
         data['trigger'] = str(trigger)
 
     return data
-
-
-def jsonify(data, status=None):
-    return Response(json.dumps(data, indent=2), status=status, mimetype='application/json')
 
 
 def fix_job_def(job_def):
