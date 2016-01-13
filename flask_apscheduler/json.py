@@ -1,9 +1,13 @@
+from __future__ import absolute_import
+
 import datetime
 import flask
-import json
 
 from apscheduler.job import Job
 from .utils import job_to_dict
+
+import json  # noqa
+
 
 loads = json.loads
 
