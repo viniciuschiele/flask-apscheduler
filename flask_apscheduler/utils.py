@@ -43,6 +43,40 @@ def job_to_dict(job):
     return data
 
 
+def dict_to_trigger(data):
+    """Converts a dict to an TriggerBase class."""
+
+    trigger_name = data.pop('trigger')
+
+    if trigger_name == 'date':
+        return DateTrigger(data.pop('run_date', None), data.pop('timezone', None))
+
+    if trigger_name == 'interval':
+        return IntervalTrigger(data.pop('weeks', 0),
+                               data.pop('days', 0),
+                               data.pop('hours', 0),
+                               data.pop('minutes', 0),
+                               data.pop('seconds', 0),
+                               data.pop('start_date', None),
+                               data.pop('end_date', None),
+                               data.pop('timezone', None))
+
+    if trigger_name == 'cron':
+        return CronTrigger(data.pop('year', None),
+                           data.pop('month', None),
+                           data.pop('day', None),
+                           data.pop('week', None),
+                           data.pop('day_of_week', None),
+                           data.pop('hour', None),
+                           data.pop('minute', None),
+                           data.pop('second', None),
+                           data.pop('start_date', None),
+                           data.pop('end_date', None),
+                           data.pop('timezone', None))
+
+    raise Exception('Trigger %s is not supported.' % trigger_name)
+
+
 def trigger_to_dict(trigger):
     """Converts a trigger to an OrderedDict."""
 
@@ -89,6 +123,9 @@ def trigger_to_dict(trigger):
 
 
 def fix_job_def(job_def):
+    """
+    Replaces the datetime in string by datetime object.
+    """
     if isinstance(job_def.get('start_date'), six.string_types):
         job_def['start_date'] = dateutil.parser.parse(job_def.get('start_date'))
 

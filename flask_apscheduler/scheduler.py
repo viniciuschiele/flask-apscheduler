@@ -20,7 +20,7 @@ import socket
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask
 from . import views
-from .utils import fix_job_def
+from .utils import fix_job_def, dict_to_trigger
 
 LOGGER = logging.getLogger('flask_apscheduler')
 
@@ -144,6 +144,9 @@ class APScheduler(object):
             raise Exception('Argument id cannot be None or empty.')
 
         fix_job_def(changes)
+
+        if 'trigger' in changes:
+            changes['trigger'] = dict_to_trigger(changes)
 
         self.__scheduler.modify_job(id, jobstore, **changes)
 

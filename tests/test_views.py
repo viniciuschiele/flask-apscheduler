@@ -74,7 +74,9 @@ class TestViews(TestCase):
         job = self.__add_job()
 
         data_to_update = {
-            'args': [1]
+            'args': [1],
+            'trigger': 'cron',
+            'minute': '*/1'
         }
 
         response = self.client.patch('/scheduler/jobs/job1', data=json.dumps(data_to_update))
@@ -85,8 +87,8 @@ class TestViews(TestCase):
         self.assertEqual(job.get('id'), job2.get('id'))
         self.assertEqual(job.get('func'), job2.get('func'))
         self.assertEqual(data_to_update.get('args'), job2.get('args'))
-        self.assertEqual(job.get('trigger'), job2.get('trigger'))
-        self.assertEqual(job.get('minutes'), job2.get('minutes'))
+        self.assertEqual(data_to_update.get('trigger'), job2.get('trigger'))
+        self.assertEqual(data_to_update.get('run_date'), job2.get('run_date'))
 
     def test_pause_and_resume_job(self):
         self.__add_job()
