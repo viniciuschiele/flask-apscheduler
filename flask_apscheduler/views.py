@@ -90,7 +90,8 @@ def update_job(job_id):
     data = request.get_json(force=True)
 
     try:
-        job = current_app.apscheduler.modify_job(job_id, **data)
+        current_app.apscheduler.modify_job(job_id, **data)
+        job = current_app.apscheduler.scheduler.get_job(job_id)
         return jsonify(job)
     except JobLookupError:
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)

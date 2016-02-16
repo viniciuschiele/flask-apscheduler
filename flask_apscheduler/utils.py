@@ -43,38 +43,26 @@ def job_to_dict(job):
     return data
 
 
-def dict_to_trigger(data):
-    """Converts a dict to an TriggerBase class."""
+def pop_trigger(data):
+    """Pops trigger and trigger args from a given dict."""
 
     trigger_name = data.pop('trigger')
+    trigger_args = {}
 
     if trigger_name == 'date':
-        return DateTrigger(data.pop('run_date', None), data.pop('timezone', None))
+        trigger_arg_names = ('run_date', 'timezone')
+    elif trigger_name == 'interval':
+        trigger_arg_names = ('weeks', 'days', 'hours', 'minutes', 'seconds', 'start_date', 'end_date', 'timezone')
+    elif trigger_name == 'cron':
+        trigger_arg_names = ('year', 'month', 'day', 'week', 'day_of_week', 'hour', 'minute', 'second', 'start_date', 'end_date', 'timezone')
+    else:
+        raise Exception('Trigger %s is not supported.' % trigger_name)
 
-    if trigger_name == 'interval':
-        return IntervalTrigger(data.pop('weeks', 0),
-                               data.pop('days', 0),
-                               data.pop('hours', 0),
-                               data.pop('minutes', 0),
-                               data.pop('seconds', 0),
-                               data.pop('start_date', None),
-                               data.pop('end_date', None),
-                               data.pop('timezone', None))
+    for arg_name in trigger_arg_names:
+        if arg_name in data:
+            trigger_args[arg_name] = data.pop(arg_name)
 
-    if trigger_name == 'cron':
-        return CronTrigger(data.pop('year', None),
-                           data.pop('month', None),
-                           data.pop('day', None),
-                           data.pop('week', None),
-                           data.pop('day_of_week', None),
-                           data.pop('hour', None),
-                           data.pop('minute', None),
-                           data.pop('second', None),
-                           data.pop('start_date', None),
-                           data.pop('end_date', None),
-                           data.pop('timezone', None))
-
-    raise Exception('Trigger %s is not supported.' % trigger_name)
+    return trigger_name, trigger_args
 
 
 def trigger_to_dict(trigger):

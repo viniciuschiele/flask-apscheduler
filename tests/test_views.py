@@ -76,7 +76,8 @@ class TestViews(TestCase):
         data_to_update = {
             'args': [1],
             'trigger': 'cron',
-            'minute': '*/1'
+            'minute': '*/1',
+            'start_date': '2021-01-01'
         }
 
         response = self.client.patch('/scheduler/jobs/job1', data=json.dumps(data_to_update))
@@ -88,7 +89,8 @@ class TestViews(TestCase):
         self.assertEqual(job.get('func'), job2.get('func'))
         self.assertEqual(data_to_update.get('args'), job2.get('args'))
         self.assertEqual(data_to_update.get('trigger'), job2.get('trigger'))
-        self.assertEqual(data_to_update.get('run_date'), job2.get('run_date'))
+        self.assertEqual('2021-01-01T00:00:00+00:00', job2.get('start_date'))
+        self.assertEqual('2021-01-01T00:00:00+00:00', job2.get('next_run_time'))
 
     def test_pause_and_resume_job(self):
         self.__add_job()

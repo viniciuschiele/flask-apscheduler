@@ -20,7 +20,7 @@ import socket
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask
 from . import views
-from .utils import fix_job_def, dict_to_trigger
+from .utils import fix_job_def, pop_trigger
 
 LOGGER = logging.getLogger('flask_apscheduler')
 
@@ -118,9 +118,7 @@ class APScheduler(object):
 
         fix_job_def(job_def)
 
-        job = self.__scheduler.add_job(**job_def)
-
-        return job
+        return self.__scheduler.add_job(**job_def)
 
     def delete_job(self, id, jobstore=None):
         """
@@ -146,13 +144,10 @@ class APScheduler(object):
         fix_job_def(changes)
 
         if 'trigger' in changes:
-            changes['trigger'] = dict_to_trigger(changes)
+            trigger, trigger_args = pop_trigger(changes)
+            self.__scheduler.reschedule_job(id, jobstore, trigger, **trigger_args)
 
-        self.__scheduler.modify_job(id, jobstore, **changes)
-
-        job = self.__scheduler.get_job(id, jobstore)
-
-        return job
+        return self.__scheduler.modify_job(id, jobstore, **changes)
 
     def pause_job(self, id, jobstore=None):
         """
