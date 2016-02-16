@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.3.7
+ - Updated jobs were not being rescheduled (Issue #14)
+
 ### Version 1.3.6
  - Allows updating the trigger over the REST API (Issue #14)
 

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='Flask-APScheduler',
-    version='1.3.6',
+    version='1.3.7',
     packages=['flask_apscheduler'],
     url='https://github.com/viniciuschiele/flask-apscheduler',
     license='Apache 2.0',
