@@ -14,4 +14,4 @@
 
 """Flask extension for APScheduler."""
 
-from flask_apscheduler.scheduler import APScheduler
+from .scheduler import APScheduler

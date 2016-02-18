@@ -16,7 +16,7 @@ class TestViews(TestCase):
     def test_add_job(self):
         job = {
             'id': 'job1',
-            'func': 'test_views:job1',
+            'func': 'tests.test_views:job1',
             'trigger': 'date',
             'run_date': '2020-12-01T12:30:01+00:00',
         }
@@ -108,7 +108,7 @@ class TestViews(TestCase):
     def __add_job(self):
         job = {
             'id': 'job1',
-            'func': 'test_views:job1',
+            'func': 'tests.test_views:job1',
             'trigger': 'interval',
             'minutes': 10,
         }
