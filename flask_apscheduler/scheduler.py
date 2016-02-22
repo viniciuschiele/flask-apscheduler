@@ -18,7 +18,6 @@ import logging
 import socket
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask
 from . import views
 from .utils import fix_job_def, pop_trigger
 
@@ -62,9 +61,6 @@ class APScheduler(object):
     def init_app(self, app):
         """Initializes the APScheduler with a Flask application instance."""
 
-        if not isinstance(app, Flask):
-            raise TypeError('app must be a Flask application')
-
         self.app = app
         self.app.apscheduler = self
 
@@ -76,9 +72,6 @@ class APScheduler(object):
 
     def start(self):
         """Starts the scheduler."""
-
-        if not self.allowed_hosts:
-            LOGGER.debug('No server allowed to start the scheduler.')
 
         if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:
             LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
@@ -105,12 +98,6 @@ class APScheduler(object):
         :param func: callable (or a textual reference to one) to run at the given time
         """
 
-        if not id:
-            raise Exception('Argument id cannot be None.')
-
-        if not func:
-            raise Exception('Argument func cannot be None.')
-
         job_def = dict(kwargs)
         job_def['id'] = id
         job_def['func'] = func
@@ -130,6 +117,29 @@ class APScheduler(object):
 
         self.__scheduler.remove_job(id, jobstore)
 
+    def get_job(self, id, jobstore=None):
+        """
+        Returns the Job that matches the given ``id``.
+
+        :param str id: the identifier of the job
+        :param str jobstore: alias of the job store that most likely contains the job
+        :return: the Job by the given ID, or ``None`` if it wasn't found
+        :rtype: Job
+        """
+
+        return self.__scheduler.get_job(id, jobstore)
+
+    def get_jobs(self, jobstore=None):
+        """
+        Returns a list of pending jobs (if the scheduler hasn't been started yet) and scheduled jobs, either from a
+        specific job store or from all of them.
+
+        :param str jobstore: alias of the job store
+        :rtype: list[Job]
+        """
+
+        return self.__scheduler.get_jobs(jobstore)
+
     def modify_job(self, id, jobstore=None, **changes):
         """
         Modifies the properties of a single job. Modifications are passed to this method as extra keyword arguments.
@@ -137,9 +147,6 @@ class APScheduler(object):
         :param str id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
         """
-
-        if not id:
-            raise Exception('Argument id cannot be None or empty.')
 
         fix_job_def(changes)
 

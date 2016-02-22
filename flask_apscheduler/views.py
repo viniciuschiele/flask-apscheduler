@@ -42,8 +42,6 @@ def add_job():
         return jsonify(job)
     except ConflictingIdError:
         return jsonify(dict(error_message='Job %s already exists.' % data.get('id')), status=409)
-    except LookupError as e:
-        return jsonify(dict(error_message=str(e)), status=400)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
 
@@ -63,7 +61,7 @@ def delete_job(job_id):
 def get_job(job_id):
     """Gets a job."""
 
-    job = current_app.apscheduler.scheduler.get_job(job_id)
+    job = current_app.apscheduler.get_job(job_id)
 
     if not job:
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
@@ -74,7 +72,7 @@ def get_job(job_id):
 def get_jobs():
     """Gets all scheduled jobs."""
 
-    jobs = current_app.apscheduler.scheduler.get_jobs()
+    jobs = current_app.apscheduler.get_jobs()
 
     job_states = []
 
@@ -91,7 +89,7 @@ def update_job(job_id):
 
     try:
         current_app.apscheduler.modify_job(job_id, **data)
-        job = current_app.apscheduler.scheduler.get_job(job_id)
+        job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
     except JobLookupError:
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
@@ -104,7 +102,7 @@ def pause_job(job_id):
 
     try:
         current_app.apscheduler.pause_job(job_id)
-        job = current_app.apscheduler.scheduler.get_job(job_id)
+        job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
     except JobLookupError:
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
@@ -117,7 +115,7 @@ def resume_job(job_id):
 
     try:
         current_app.apscheduler.resume_job(job_id)
-        job = current_app.apscheduler.scheduler.get_job(job_id)
+        job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
     except JobLookupError:
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
@@ -130,7 +128,7 @@ def run_job(job_id):
 
     try:
         current_app.apscheduler.run_job(job_id)
-        job = current_app.apscheduler.scheduler.get_job(job_id)
+        job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
     except LookupError:
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
