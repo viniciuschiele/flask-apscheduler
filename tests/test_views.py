@@ -13,6 +13,14 @@ class TestViews(TestCase):
         self.scheduler.start()
         self.client = self.app.test_client()
 
+    def test_scheduler_info(self):
+        response = self.client.get('/scheduler')
+        self.assertEqual(response.status_code, 200)
+        info = json.loads(response.get_data(as_text=True))
+        self.assertIsNotNone(info['current_host'])
+        self.assertEqual(info['allowed_hosts'], ['*'])
+        self.assertTrue(info['running'])
+
     def test_add_job(self):
         job = {
             'id': 'job1',
@@ -31,6 +39,20 @@ class TestViews(TestCase):
         self.assertEqual(job.get('trigger'), job2.get('trigger'))
         self.assertEqual(job.get('run_date'), job2.get('run_date'))
 
+    def test_add_conflict_job(self):
+        job = {
+            'id': 'job1',
+            'func': 'tests.test_views:job1',
+            'trigger': 'date',
+            'run_date': '2020-12-01T12:30:01+00:00',
+        }
+
+        response = self.client.post('/scheduler/jobs', data=json.dumps(job))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/scheduler/jobs', data=json.dumps(job))
+        self.assertEqual(response.status_code, 409)
+
     def test_delete_job(self):
         self.__add_job()
 
@@ -38,6 +60,10 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 204)
 
         response = self.client.get('/scheduler/jobs/job1')
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_job_not_found(self):
+        response = self.client.delete('/scheduler/jobs/job1')
         self.assertEqual(response.status_code, 404)
 
     def test_get_job(self):
@@ -52,6 +78,10 @@ class TestViews(TestCase):
         self.assertEqual(job.get('func'), job2.get('func'))
         self.assertEqual(job.get('trigger'), job2.get('trigger'))
         self.assertEqual(job.get('minutes'), job2.get('minutes'))
+
+    def test_get_job_not_found(self):
+        response = self.client.get('/scheduler/jobs/job1')
+        self.assertEqual(response.status_code, 404)
 
     def test_get_all_jobs(self):
         job = self.__add_job()
@@ -104,6 +134,18 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 200)
         job = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(job.get('next_run_time'))
+
+    def test_run_job(self):
+        self.__add_job()
+
+        response = self.client.post('/scheduler/jobs/job1/run')
+        self.assertEqual(response.status_code, 200)
+        job = json.loads(response.get_data(as_text=True))
+        self.assertIsNotNone(job.get('next_run_time'))
+
+    def test_run_job_not_found(self):
+        response = self.client.post('/scheduler/jobs/job1/run')
+        self.assertEqual(response.status_code, 404)
 
     def __add_job(self):
         job = {
