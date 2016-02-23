@@ -28,9 +28,6 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
 
-        if isinstance(obj, datetime.date):
-            return obj.isoformat()
-
         if isinstance(obj, Job):
             return job_to_dict(obj)
 

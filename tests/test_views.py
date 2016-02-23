@@ -39,7 +39,7 @@ class TestViews(TestCase):
         self.assertEqual(job.get('trigger'), job2.get('trigger'))
         self.assertEqual(job.get('run_date'), job2.get('run_date'))
 
-    def test_add_conflict_job(self):
+    def test_add_conflicted_job(self):
         job = {
             'id': 'job1',
             'func': 'tests.test_views:job1',
@@ -52,6 +52,14 @@ class TestViews(TestCase):
 
         response = self.client.post('/scheduler/jobs', data=json.dumps(job))
         self.assertEqual(response.status_code, 409)
+
+    def test_add_invalid_job(self):
+        job = {
+            'id': None,
+        }
+
+        response = self.client.post('/scheduler/jobs', data=json.dumps(job))
+        self.assertEqual(response.status_code, 500)
 
     def test_delete_job(self):
         self.__add_job()
@@ -122,6 +130,27 @@ class TestViews(TestCase):
         self.assertEqual('2021-01-01T00:00:00+00:00', job2.get('start_date'))
         self.assertEqual('2021-01-01T00:00:00+00:00', job2.get('next_run_time'))
 
+    def test_update_job_not_found(self):
+        data_to_update = {
+            'args': [1],
+            'trigger': 'cron',
+            'minute': '*/1',
+            'start_date': '2021-01-01'
+        }
+
+        response = self.client.patch('/scheduler/jobs/job1', data=json.dumps(data_to_update))
+        self.assertEqual(response.status_code, 404)
+
+    def test_update_invalid_job(self):
+        self.__add_job()
+
+        data_to_update = {
+            'trigger': 'invalid_trigger',
+        }
+
+        response = self.client.patch('/scheduler/jobs/job1', data=json.dumps(data_to_update))
+        self.assertEqual(response.status_code, 500)
+
     def test_pause_and_resume_job(self):
         self.__add_job()
 
@@ -134,6 +163,13 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 200)
         job = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(job.get('next_run_time'))
+
+    def test_pause_and_resume_job_not_found(self):
+        response = self.client.post('/scheduler/jobs/job1/pause')
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.post('/scheduler/jobs/job1/resume')
+        self.assertEqual(response.status_code, 404)
 
     def test_run_job(self):
         self.__add_job()

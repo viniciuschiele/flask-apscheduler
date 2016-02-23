@@ -16,11 +16,13 @@ class TestScheduler(TestCase):
     def test_start_with_allowed_hosts(self):
         self.app.config['SCHEDULER_ALLOWED_HOSTS'] = ['any_server_name']
         self.scheduler.init_app(self.app)
+        self.scheduler.start()
         self.assertFalse(self.scheduler.running)
 
     def test_start_without_allowed_hosts(self):
         self.app.config['SCHEDULER_ALLOWED_HOSTS'] = []
         self.scheduler.init_app(self.app)
+        self.scheduler.start()
         self.assertFalse(self.scheduler.running)
 
     def test_shutdown(self):
