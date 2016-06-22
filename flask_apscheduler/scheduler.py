@@ -117,6 +117,15 @@ class APScheduler(object):
 
         self.__scheduler.remove_job(id, jobstore)
 
+    def delete_all_jobs(self, jobstore=None):
+        """
+        Removes all jobs from the specified job store, or all job stores if none is given.
+        
+        :param str|unicode jobstore: alias of the job store
+        """
+
+        self.__scheduler.remove_all_jobs(jobstore)
+
     def get_job(self, id, jobstore=None):
         """
         Returns the Job that matches the given ``id``.
