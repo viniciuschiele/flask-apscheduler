@@ -1,5 +1,9 @@
 # Changelog
 
+### Version 1.4.0
+ - Upgrade APScheduler to the version 3.2.0
+ - Add new method to remove all jobs. Thanks [JWhy](https://github.com/JWhy).
+
 ### Version 1.3.7
  - Updated jobs were not being rescheduled (Issue #14)
 
