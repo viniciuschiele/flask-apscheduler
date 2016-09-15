@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.5.0
+ - Set a min version for all the dependencies (Issue #18)
+
 ### Version 1.4.0
  - Upgrade APScheduler to the version 3.2.0
  - Add new method to remove all jobs. Thanks [JWhy](https://github.com/JWhy).
@@ -8,7 +11,7 @@
  - Updated jobs were not being rescheduled (Issue #14)
 
 ### Version 1.3.6
- - Allows updating the trigger over the REST API (Issue #14)
+ - Allow updating the trigger over the REST API (Issue #14)
 
 ### Version 1.3.5
  - Bug fix #9
