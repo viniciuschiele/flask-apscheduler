@@ -135,3 +135,11 @@ def extract_timedelta(delta):
     mm, ss = divmod(delta.seconds, 60)
     hh, mm = divmod(mm, 60)
     return w, d, hh, mm, ss
+
+
+class Singleton(object):
+    _instance = None
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
+        return cls._instance

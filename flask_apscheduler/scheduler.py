@@ -19,12 +19,12 @@ import socket
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from . import views
-from .utils import fix_job_def, pop_trigger
+from .utils import fix_job_def, pop_trigger, Singleton
 
 LOGGER = logging.getLogger('flask_apscheduler')
 
 
-class APScheduler(object):
+class APScheduler(Singleton):
     """Provides a scheduler integrated to Flask."""
 
     def __init__(self, scheduler=None, app=None):
@@ -60,8 +60,12 @@ class APScheduler(object):
 
     def init_app(self, app):
         """Initializes the APScheduler with a Flask application instance."""
+        ###############################
+        ### Follow a singletone pattern
+        ###############################
 
         self.app = app
+        
         self.app.apscheduler = self
 
         self.__load_config()
