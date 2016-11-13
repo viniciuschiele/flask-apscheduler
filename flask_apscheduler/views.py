@@ -69,6 +69,17 @@ def get_job(job_id):
     return jsonify(job)
 
 
+def reload_jobs():
+    """Reloads all jobs, see flask_apscheduler.APScheduler.reload_jobs()."""
+    data = request.get_json(force=True)
+
+    try:
+        current_app.apscheduler.reload_jobs(**data)
+        return get_jobs()
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
 def get_jobs():
     """Gets all scheduled jobs."""
 
@@ -89,6 +100,38 @@ def update_job(job_id):
 
     try:
         current_app.apscheduler.modify_job(job_id, **data)
+        job = current_app.apscheduler.get_job(job_id)
+        return jsonify(job)
+    except JobLookupError:
+        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
+def reschedule_job(job_id):
+    """Reschedules a job."""
+
+    data = request.get_json(force=True)
+
+    try:
+        current_app.apscheduler.scheduler.reschedule_job(job_id, **data)
+        job = current_app.apscheduler.get_job(job_id)
+        return jsonify(job)
+    except JobLookupError:
+        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
+def reschedule_job_once(job_id):
+    """Reschedules a job once, so it runs next time with the given trigger, but the after next run will have again
+    the normal trigger schedule as defined in the job definitions. Requires the job definition path in the request
+    body."""
+
+    data = request.get_json(force=True)
+
+    try:
+        current_app.apscheduler.reschedule_job_once(job_id, **data)
         job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
     except JobLookupError:

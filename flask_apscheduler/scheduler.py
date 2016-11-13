@@ -14,9 +14,11 @@
 
 """APScheduler implementation."""
 
+import importlib        
 import logging
 import socket
 
+import apscheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from . import views
 from .utils import fix_job_def, pop_trigger
@@ -65,8 +67,8 @@ class APScheduler(object):
         self.app.apscheduler = self
 
         self.__load_config()
+        self.__scheduler.start()
         self.__load_jobs()
-
         if self.__views_enabled:
             self.__load_views()
 
@@ -90,32 +92,32 @@ class APScheduler(object):
 
         self.__scheduler.shutdown(wait)
 
-    def add_job(self, id, func, **kwargs):
+    def add_job(self, job_id, func, **kwargs):
         """
         Adds the given job to the job list and wakes up the scheduler if it's already running.
 
-        :param str id: explicit identifier for the job (for modifying it later)
+        :param str job_id: explicit identifier for the job (for modifying it later)
         :param func: callable (or a textual reference to one) to run at the given time
         """
 
         job_def = dict(kwargs)
-        job_def['id'] = id
+        job_def['job_id'] = job_id
         job_def['func'] = func
-        job_def['name'] = job_def.get('name') or id
+        job_def['name'] = job_def.get('name') or job_id
 
         fix_job_def(job_def)
 
         return self.__scheduler.add_job(**job_def)
 
-    def delete_job(self, id, jobstore=None):
+    def delete_job(self, job_id, jobstore=None):
         """
         Removes a job, preventing it from being run any more.
 
-        :param str id: the identifier of the job
+        :param str job_id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
         """
 
-        self.__scheduler.remove_job(id, jobstore)
+        self.__scheduler.remove_job(job_id, jobstore)
 
     def delete_all_jobs(self, jobstore=None):
         """
@@ -124,19 +126,19 @@ class APScheduler(object):
         :param str|unicode jobstore: alias of the job store
         """
 
-        self.__scheduler.remove_all_jobs(jobstore)
+        self._scheduler.remove_all_jobs(jobstore)
 
-    def get_job(self, id, jobstore=None):
+    def get_job(self, job_id, jobstore=None):
         """
-        Returns the Job that matches the given ``id``.
+        Returns the Job that matches the given ``job_id``.
 
-        :param str id: the identifier of the job
+        :param str job_id: the identifier of the job
         :param str jobstore: alias of the job store that most likely contains the job
         :return: the Job by the given ID, or ``None`` if it wasn't found
         :rtype: Job
         """
 
-        return self.__scheduler.get_job(id, jobstore)
+        return self.__scheduler.get_job(job_id, jobstore)
 
     def get_jobs(self, jobstore=None):
         """
@@ -149,11 +151,11 @@ class APScheduler(object):
 
         return self.__scheduler.get_jobs(jobstore)
 
-    def modify_job(self, id, jobstore=None, **changes):
+    def modify_job(self, job_id, jobstore=None, **changes):
         """
         Modifies the properties of a single job. Modifications are passed to this method as extra keyword arguments.
 
-        :param str id: the identifier of the job
+        :param str job_id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
         """
 
@@ -161,34 +163,34 @@ class APScheduler(object):
 
         if 'trigger' in changes:
             trigger, trigger_args = pop_trigger(changes)
-            self.__scheduler.reschedule_job(id, jobstore, trigger, **trigger_args)
+            self.__scheduler.reschedule_job(job_id, jobstore, trigger, **trigger_args)
 
-        return self.__scheduler.modify_job(id, jobstore, **changes)
+        return self.__scheduler.modify_job(job_id, jobstore, **changes)
 
-    def pause_job(self, id, jobstore=None):
+    def pause_job(self, job_id, jobstore=None):
         """
         Causes the given job not to be executed until it is explicitly resumed.
 
-        :param str id: the identifier of the job
+        :param str job_id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
         """
 
-        self.__scheduler.pause_job(id, jobstore)
+        self.__scheduler.pause_job(job_id, jobstore)
 
-    def resume_job(self, id, jobstore=None):
+    def resume_job(self, job_id, jobstore=None):
         """
         Resumes the schedule of the given job, or removes the job if its schedule is finished.
 
-        :param str id: the identifier of the job
+        :param str job_id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
         """
-        self.__scheduler.resume_job(id, jobstore)
+        self.__scheduler.resume_job(job_id, jobstore)
 
-    def run_job(self, id, jobstore=None):
-        job = self.__scheduler.get_job(id, jobstore)
+    def run_job(self, job_id, jobstore=None):
+        job = self.__scheduler.get_job(job_id, jobstore)
 
         if not job:
-            raise LookupError(id)
+            raise LookupError(job_id)
 
         job.func(*job.args, **job.kwargs)
 
@@ -227,8 +229,81 @@ class APScheduler(object):
             jobs = self.app.config.get('JOBS')
 
         if jobs:
-            for job in jobs:
-                self.add_job(**job)
+            self.reload_jobs(jobs=jobs)
+
+    def reschedule_job_once(self, job_id, configpath, **data):
+        """Reschedules a job once, so it runs next time with the given trigger, but the after next run will have again
+        the normal trigger schedule as defined in the job definitions. Requires the job definition path in the request
+        body."""
+        jobs = self.loadconfig(configpath)
+        self.__scheduler.reschedule_job(job_id, **data)
+        log.debug(jobs)
+        log.debug(job_id)
+        modify_kwargs = self.fix_trigger([x for x in jobs if x["job_id"] == job_id][0])
+        self.scheduler.modify_job(**modify_kwargs)
+
+    def job_kwargs(self, job_id, func, trigger, **kwargs):
+        if kwargs:
+            return job_id, func, trigger, kwargs
+        else:
+            return job_id, func, trigger
+
+    def job_nokwargs(self, job_id, func, trigger, **kwargs):
+        return {"job_id": job_id, "func": func, "trigger": trigger}
+
+    def loadconfig(self, configpath):
+        """Returns the job definition dictionary from given configpath. importlib.reload() ensures to reimport each
+        time."""
+        mod, var = configpath.rsplit(".", 1)
+        mod = importlib.reload(importlib.import_module(mod))
+        jobs = getattr(mod, var)
+        return jobs
+
+    def fix_trigger(self, kwargs):
+        """Replaces the trigger string value for the triggers 'interval', 'date' and 'cron' with their actual
+        class instance. apscheduler.modify_job() for example wants the trigger as an object and not string."""
+        if kwargs["trigger"] == "interval":
+            trigger_kwargs = self.job_kwargs(**kwargs)[3]
+            kwargs["trigger"] = apscheduler.triggers.interval.IntervalTrigger(**trigger_kwargs)
+        elif kwargs["trigger"] == "date":
+            trigger_kwargs = self.job_kwargs(**kwargs)[3]
+            kwargs["trigger"] = apscheduler.triggers.date.DateTrigger(**trigger_kwargs)
+        elif kwargs["trigger"] == "cron":
+            trigger_kwargs = self.job_kwargs(**kwargs)[3]
+            kwargs["trigger"] = apscheduler.triggers.cron.CronTrigger(**trigger_kwargs)
+        kwargs = self.job_nokwargs(**kwargs)
+        return kwargs
+
+    def reload_jobs(self, configpath=None, jobs=None, reschedule_changed_jobs=False):
+        """Goes through all defined jobs and checks if they're in the jobstore, if not they're added. Applies any job
+        definition changes. If reschedule_changed_jobs is True, then it also reschedules all jobs with the current
+        defined trigger. Jobstore jobs, that are not in our job definitions are removed. 
+        Example for the configpath parameter: 'somemodule.somefile.myconfdict'."""
+        if configpath:
+            jobs = self.loadconfig(configpath)
+        elif jobs:
+            pass
+        else:
+            LOGGER.error("Please provide either a configpath or a list with the job definitions.")
+            return None
+        jobstore_job_ids = [j.id for j in self.scheduler.get_jobs()]
+        for x in jobs: 
+            modify_kwargs = x.copy()
+            reschedule_kwargs = x.copy()
+            reschedule_kwargs.pop("func")
+            if x["job_id"] in jobstore_job_ids:
+                modify_kwargs = self.fix_trigger(modify_kwargs)
+                self.scheduler.modify_job(**modify_kwargs)  # "default"
+                if reschedule_changed_jobs:
+                    self.scheduler.reschedule_job(**reschedule_kwargs)  # jobstore="default"
+                LOGGER.debug("Job already in jobstore. Updated possible definitions changes.")
+            else:   
+                LOGGER.debug("Added schedule for: {0}".format(jkey))
+                self._scheduler.add_job(**x)
+        # Removing job ids that are no longer in our job definitions.
+        for x in jobstore_job_ids:
+            if x not in [x["job_id"] for x in jobs]:
+                self.delete_job(x)
 
     def __load_views(self):
         """Adds the routes for the scheduler UI."""
@@ -236,9 +311,12 @@ class APScheduler(object):
         self.app.add_url_rule('/scheduler', 'get_scheduler_info', views.get_scheduler_info)
         self.app.add_url_rule('/scheduler/jobs', 'add_job', views.add_job, methods=['POST'])
         self.app.add_url_rule('/scheduler/jobs', 'get_jobs', views.get_jobs)
+        self.app.add_url_rule('/scheduler/jobs/reload_jobs', 'reload_jobs', views.reload_jobs, methods=['POST'])
         self.app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', views.get_job)
         self.app.add_url_rule('/scheduler/jobs/<job_id>', 'delete_job', views.delete_job, methods=['DELETE'])
         self.app.add_url_rule('/scheduler/jobs/<job_id>', 'update_job', views.update_job, methods=['PATCH'])
+        self.app.add_url_rule('/scheduler/jobs/<job_id>/reschedule', 'reschedule_job', views.reschedule_job, methods=['PATCH'])
+        self.app.add_url_rule('/scheduler/jobs/<job_id>/reschedule_once', 'reschedule_job_once', views.reschedule_job_once, methods=['PATCH'])
         self.app.add_url_rule('/scheduler/jobs/<job_id>/pause', 'pause_job', views.pause_job, methods=['POST'])
         self.app.add_url_rule('/scheduler/jobs/<job_id>/resume', 'resume_job', views.resume_job, methods=['POST'])
         self.app.add_url_rule('/scheduler/jobs/<job_id>/run', 'run_job', views.run_job, methods=['POST'])
