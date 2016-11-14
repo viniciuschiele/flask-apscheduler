@@ -46,25 +46,25 @@ def add_job():
         return jsonify(dict(error_message=str(e)), status=500)
 
 
-def delete_job(job_id):
+def delete_job(id):
     """Deletes a job."""
 
     try:
-        current_app.apscheduler.delete_job(job_id)
+        current_app.apscheduler.delete_job(id)
         return Response(status=204)
     except JobLookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+        return jsonify(dict(error_message='Job %s not found' % id), status=404)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
 
 
-def get_job(job_id):
+def get_job(id):
     """Gets a job."""
 
-    job = current_app.apscheduler.get_job(job_id)
+    job = current_app.apscheduler.get_job(id)
 
     if not job:
-        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+        return jsonify(dict(error_message='Job %s not found' % id), status=404)
 
     return jsonify(job)
 
@@ -93,37 +93,37 @@ def get_jobs():
     return jsonify(job_states)
 
 
-def update_job(job_id):
+def update_job(id):
     """Updates a job."""
 
     data = request.get_json(force=True)
 
     try:
-        current_app.apscheduler.modify_job(job_id, **data)
-        job = current_app.apscheduler.get_job(job_id)
+        current_app.apscheduler.modify_job(id, **data)
+        job = current_app.apscheduler.get_job(id)
         return jsonify(job)
     except JobLookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+        return jsonify(dict(error_message='Job %s not found' % id), status=404)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
 
 
-def reschedule_job(job_id):
+def reschedule_job(id):
     """Reschedules a job."""
 
     data = request.get_json(force=True)
 
     try:
-        current_app.apscheduler.scheduler.reschedule_job(job_id, **data)
-        job = current_app.apscheduler.get_job(job_id)
+        current_app.apscheduler.scheduler.reschedule_job(id, **data)
+        job = current_app.apscheduler.get_job(id)
         return jsonify(job)
     except JobLookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+        return jsonify(dict(error_message='Job %s not found' % id), status=404)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
 
 
-def reschedule_job_once(job_id):
+def reschedule_job_once(id):
     """Reschedules a job once, so it runs next time with the given trigger, but the after next run will have again
     the normal trigger schedule as defined in the job definitions. Requires the job definition path in the request
     body."""
@@ -131,49 +131,49 @@ def reschedule_job_once(job_id):
     data = request.get_json(force=True)
 
     try:
-        current_app.apscheduler.reschedule_job_once(job_id, **data)
-        job = current_app.apscheduler.get_job(job_id)
+        current_app.apscheduler.reschedule_job_once(id, **data)
+        job = current_app.apscheduler.get_job(id)
         return jsonify(job)
     except JobLookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+        return jsonify(dict(error_message='Job %s not found' % id), status=404)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
 
 
-def pause_job(job_id):
+def pause_job(id):
     """Pauses a job."""
 
     try:
-        current_app.apscheduler.pause_job(job_id)
-        job = current_app.apscheduler.get_job(job_id)
+        current_app.apscheduler.pause_job(id)
+        job = current_app.apscheduler.get_job(id)
         return jsonify(job)
     except JobLookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+        return jsonify(dict(error_message='Job %s not found' % id), status=404)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
 
 
-def resume_job(job_id):
+def resume_job(id):
     """Resumes a job."""
 
     try:
-        current_app.apscheduler.resume_job(job_id)
-        job = current_app.apscheduler.get_job(job_id)
+        current_app.apscheduler.resume_job(id)
+        job = current_app.apscheduler.get_job(id)
         return jsonify(job)
     except JobLookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+        return jsonify(dict(error_message='Job %s not found' % id), status=404)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
 
 
-def run_job(job_id):
+def run_job(id):
     """Executes a job."""
 
     try:
-        current_app.apscheduler.run_job(job_id)
-        job = current_app.apscheduler.get_job(job_id)
+        current_app.apscheduler.run_job(id)
+        job = current_app.apscheduler.get_job(id)
         return jsonify(job)
     except LookupError:
-        return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
+        return jsonify(dict(error_message='Job %s not found' % id), status=404)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
