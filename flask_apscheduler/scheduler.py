@@ -67,8 +67,6 @@ class APScheduler(object):
         self.app.apscheduler = self
 
         self.__load_config()
-        self.__scheduler.start()
-        self.__load_jobs()
         if self.__views_enabled:
             self.__load_views()
 
@@ -81,6 +79,7 @@ class APScheduler(object):
             return
 
         self.__scheduler.start()
+        self.__load_jobs()
 
     def shutdown(self, wait=True):
         """
@@ -256,7 +255,7 @@ class APScheduler(object):
             return id, func, trigger
 
     def job_nokwargs(self, func, trigger, id=None, job_id=None, **kwargs):
-        """Provide either id or job_id."""
+        """Provide either id or job_id. Removes kwargs from given job dictionary."""
         if id:
             return {"id": id, "func": func, "trigger": trigger}
         elif job_id:
@@ -317,7 +316,7 @@ class APScheduler(object):
                     self.scheduler.reschedule_job(**reschedule_kwargs)  # jobstore="default"
                 LOGGER.debug("Job already in jobstore. Updated possible definitions changes.")
             else:   
-                LOGGER.debug("Added schedule for: {0}".format(jkey))
+                LOGGER.debug("Added schedule for: {0}".format(x["id"]))
                 self.scheduler.add_job(**x)
         # Removing job ids that are no longer in our job definitions.
         for x in jobstore_ids:
