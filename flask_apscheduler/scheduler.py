@@ -16,7 +16,9 @@
 
 import importlib        
 import logging
+import os
 import socket
+from logging.handlers import RotatingFileHandler
 
 import apscheduler
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -223,12 +225,43 @@ class APScheduler(object):
         """Loads the job definitions from the Flask configuration."""
 
         jobs = self.app.config.get('SCHEDULER_JOBS')
+        job_stores = self.app.config.get('SCHEDULER_JOBSTORES')
 
         if not jobs:
             jobs = self.app.config.get('JOBS')
 
         if jobs:
-            self.reload_jobs(jobs=jobs)
+            if job_stores:
+                self.reload_jobs(jobs=jobs)
+            else:
+                for job in jobs:
+                    self.add_job(**job)
+
+    def create_job_loggers(self, jobs):
+        """Creates a logger for each job using the job id as logger name. Adds a file handler for each job logger. Uses
+        the JOBLOG_PATH from your Flask config class."""
+        self.add_filehandler("apscheduler.executors.default")
+        self.add_filehandler("apscheduler.scheduler")
+        self.add_filehandler("flask_apscheduler")
+        for x in jobs:
+            # Creating a logger for each job and adding a seperate filehandler for each logger. Job ids have to have the
+            # same logger name of the functions that the jobs invoke.         
+            self.add_filehandler(x["id"])
+
+    def add_filehandler(self, name):
+        joblog_path = self.app.config.get('JOBLOG_PATH')
+        logger = logging.getLogger(name)
+        # backupCount keeps old logs, e.g. backupCount=5 would keep app.log, app.log.1, app.log.2, up to app.log.5.
+        # maxBytes=5*1024*1024 equals 5 MiB.
+        fileh = RotatingFileHandler(os.path.join(joblog_path, "%s.log" % name), mode='a', maxBytes=5*1024*1024,
+                                    backupCount=5, encoding=None, delay=0)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fileh.setFormatter(formatter)
+        # Removing all old handlers. Requires [:], which takes a copy, because log.handlers removes handlers inplace
+        # and then our loop fails. If not removing old handlers we'd get dupes.
+        for hdlr in logger.handlers[:]:
+            logger.removeHandler(hdlr)
+        logger.addHandler(fileh)
 
     def reschedule_job_once(self, id, configpath, **data):
         """Reschedules a job once, so it runs next time with the given trigger, but the after next run will have again
@@ -237,31 +270,24 @@ class APScheduler(object):
         jobs = self.loadconfig(configpath)
         self.__scheduler.reschedule_job(id, **data)
         modify_kwargs = self.fix_trigger([x for x in jobs if x["id"] == id][0])
-        modify_kwargs = self.job_nokwargs(**modify_kwargs)
-        modify_kwargs = self.job_id_kwargs(modify_kwargs)
+        modify_kwargs = self.remove_trigger_kwargs(**modify_kwargs)
+        modify_kwargs = self.rename_dictkey(modify_kwargs, "id", "job_id")
         self.scheduler.modify_job(**modify_kwargs)
 
-    def job_kwargs(self, func, trigger, id=None, job_id=None, **kwargs):
-        """Provide either id or job_id."""
-        if id:
-            id = id
-        elif job_id:
-            id = job_id
-        else:
-            raise Exception("Either provide id or job_id")
+    def get_trigger_kwargs(self, func, trigger, id=None, job_id=None, name=None, coalesce=None, misfire_grace_time=None, max_instances=None, next_run_time=None, **kwargs):
+        """Returns trigger kwargs. It'd be better to put the trigger kwargs into a subdictionary though, than extracting
+        them like this."""
         if kwargs:
-            return id, func, trigger, kwargs
+            return kwargs
         else:
-            return id, func, trigger
+            return None
 
-    def job_nokwargs(self, func, trigger, id=None, job_id=None, **kwargs):
-        """Provide either id or job_id. Removes kwargs from given job dictionary."""
-        if id:
-            return {"id": id, "func": func, "trigger": trigger}
-        elif job_id:
-            return {"job_id": job_id, "func": func, "trigger": trigger}
-        else:
-            raise Exception("Either provide id or job_id")
+    def remove_trigger_kwargs(self, x):
+        """Removes trigger kwargs."""
+        kwargs = self.get_trigger_kwargs(**x)
+        if kwargs:
+            [x.pop(k) for k, v in kwargs.items()]
+        return x
 
     def loadconfig(self, configpath):
         """Returns the job definition dictionary from given configpath. importlib.reload() ensures to reimport each
@@ -274,21 +300,19 @@ class APScheduler(object):
     def fix_trigger(self, kwargs):
         """Replaces the trigger string value for the triggers 'interval', 'date' and 'cron' with their actual
         class instance. apscheduler.modify_job() for example wants the trigger as an object and not string."""
+        trigger_kwargs = self.get_trigger_kwargs(**kwargs)
         if kwargs["trigger"] == "interval":
-            trigger_kwargs = self.job_kwargs(**kwargs)[3]
             kwargs["trigger"] = apscheduler.triggers.interval.IntervalTrigger(**trigger_kwargs)
         elif kwargs["trigger"] == "date":
-            trigger_kwargs = self.job_kwargs(**kwargs)[3]
             kwargs["trigger"] = apscheduler.triggers.date.DateTrigger(**trigger_kwargs)
         elif kwargs["trigger"] == "cron":
-            trigger_kwargs = self.job_kwargs(**kwargs)[3]
             kwargs["trigger"] = apscheduler.triggers.cron.CronTrigger(**trigger_kwargs)
         return kwargs
 
-    def job_id_kwargs(self, kwargs):
+    def rename_dictkey(self, kwargs, old, new):
         """Renames the key 'id' to 'job_id'."""
         x = kwargs.copy()
-        x["job_id"] = x.pop("id")
+        x[new] = x.pop(old)
         return x
 
     def reload_jobs(self, configpath=None, jobs=None, reschedule_changed_jobs=False):
@@ -304,15 +328,18 @@ class APScheduler(object):
             LOGGER.error("Please provide either a configpath or a list with the job definitions.")
             return None
         jobstore_ids = [j.id for j in self.scheduler.get_jobs()]
+        joblog_path = self.app.config.get('JOBLOG_PATH')
+        if joblog_path:
+            self.create_job_loggers(jobs)
         for x in jobs: 
-            modify_kwargs = self.job_id_kwargs(x)
-            reschedule_kwargs = self.job_id_kwargs(x)
+            modify_kwargs = self.rename_dictkey(x, "id", "job_id")
+            reschedule_kwargs = self.rename_dictkey(x, "id", "job_id")
             reschedule_kwargs.pop("func")
             if x["id"] in jobstore_ids:
                 modify_kwargs = self.fix_trigger(modify_kwargs)
-                modify_kwargs = self.job_nokwargs(**modify_kwargs)
+                modify_kwargs = self.remove_trigger_kwargs(modify_kwargs)
                 self.scheduler.modify_job(**modify_kwargs)  # "default"
-                if reschedule_changed_jobs:
+                if reschedule_changed_jobs in ["true", "True"]:
                     self.scheduler.reschedule_job(**reschedule_kwargs)  # jobstore="default"
                 LOGGER.debug("Job already in jobstore. Updated possible definitions changes.")
             else:   
