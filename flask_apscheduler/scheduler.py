@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """APScheduler implementation."""
-
+import functools
 import importlib        
 import logging
 import os
@@ -22,7 +22,8 @@ from logging.handlers import RotatingFileHandler
 
 import apscheduler
 from apscheduler.schedulers.background import BackgroundScheduler
-from . import views
+from flask import make_response, request
+from . import api
 from .utils import fix_job_def, pop_trigger
 
 LOGGER = logging.getLogger('flask_apscheduler')
@@ -32,10 +33,13 @@ class APScheduler(object):
     """Provides a scheduler integrated to Flask."""
 
     def __init__(self, scheduler=None, app=None):
-        self.__scheduler = scheduler or BackgroundScheduler()
-        self.__allowed_hosts = ['*']
-        self.__host_name = socket.gethostname().lower()
-        self.__views_enabled = False
+        self._scheduler = scheduler or BackgroundScheduler()
+        self._allowed_hosts = ['*']
+        self._auth_enabled = False
+        self._api_enabled = False
+
+        self._host_name = socket.gethostname().lower()
+        self._authentication_callback = None
 
         self.app = None
 
@@ -45,12 +49,12 @@ class APScheduler(object):
     @property
     def host_name(self):
         """Gets the host name."""
-        return self.__host_name
+        return self._host_name
 
     @property
     def allowed_hosts(self):
         """Gets the allowed hosts."""
-        return self.__allowed_hosts
+        return self._allowed_hosts
 
     @property
     def running(self):
@@ -60,7 +64,7 @@ class APScheduler(object):
     @property
     def scheduler(self):
         """Gets the base scheduler."""
-        return self.__scheduler
+        return self._scheduler
 
     def init_app(self, app):
         """Initializes the APScheduler with a Flask application instance."""
@@ -68,9 +72,9 @@ class APScheduler(object):
         self.app = app
         self.app.apscheduler = self
 
-        self.__load_config()
-        if self.__views_enabled:
-            self.__load_views()
+        self._load_config()
+        if self._api_enabled:
+            self._load_api()
 
     def start(self):
         """Starts the scheduler."""
@@ -80,8 +84,8 @@ class APScheduler(object):
                          (self.host_name, ','.join(self.allowed_hosts)))
             return
 
-        self.__scheduler.start()
-        self.__load_jobs()
+        self._scheduler.start()
+        self._load_jobs()
 
     def shutdown(self, wait=True):
         """
@@ -91,7 +95,7 @@ class APScheduler(object):
         :raises SchedulerNotRunningError: if the scheduler has not been started yet
         """
 
-        self.__scheduler.shutdown(wait)
+        self._scheduler.shutdown(wait)
 
     def add_job(self, id, func, **kwargs):
         """
@@ -108,7 +112,7 @@ class APScheduler(object):
 
         fix_job_def(job_def)
 
-        return self.__scheduler.add_job(**job_def)
+        return self._scheduler.add_job(**job_def)
 
     def delete_job(self, id, jobstore=None):
         """
@@ -118,7 +122,7 @@ class APScheduler(object):
         :param str jobstore: alias of the job store that contains the job
         """
 
-        self.__scheduler.remove_job(id, jobstore)
+        self._scheduler.remove_job(id, jobstore)
 
     def delete_all_jobs(self, jobstore=None):
         """
@@ -127,7 +131,7 @@ class APScheduler(object):
         :param str|unicode jobstore: alias of the job store
         """
 
-        self.__scheduler.remove_all_jobs(jobstore)
+        self._scheduler.remove_all_jobs(jobstore)
 
     def get_job(self, id, jobstore=None):
         """
@@ -139,7 +143,7 @@ class APScheduler(object):
         :rtype: Job
         """
 
-        return self.__scheduler.get_job(id, jobstore)
+        return self._scheduler.get_job(id, jobstore)
 
     def get_jobs(self, jobstore=None):
         """
@@ -150,7 +154,7 @@ class APScheduler(object):
         :rtype: list[Job]
         """
 
-        return self.__scheduler.get_jobs(jobstore)
+        return self._scheduler.get_jobs(jobstore)
 
     def modify_job(self, id, jobstore=None, **changes):
         """
@@ -164,9 +168,9 @@ class APScheduler(object):
 
         if 'trigger' in changes:
             trigger, trigger_args = pop_trigger(changes)
-            self.__scheduler.reschedule_job(id, jobstore, trigger, **trigger_args)
+            self._scheduler.reschedule_job(id, jobstore, trigger, **trigger_args)
 
-        return self.__scheduler.modify_job(id, jobstore, **changes)
+        return self._scheduler.modify_job(id, jobstore, **changes)
 
     def pause_job(self, id, jobstore=None):
         """
@@ -176,7 +180,7 @@ class APScheduler(object):
         :param str jobstore: alias of the job store that contains the job
         """
 
-        self.__scheduler.pause_job(id, jobstore)
+        self._scheduler.pause_job(id, jobstore)
 
     def resume_job(self, id, jobstore=None):
         """
@@ -185,17 +189,25 @@ class APScheduler(object):
         :param str id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
         """
-        self.__scheduler.resume_job(id, jobstore)
+        self._scheduler.resume_job(id, jobstore)
 
     def run_job(self, id, jobstore=None):
-        job = self.__scheduler.get_job(id, jobstore)
+        job = self._scheduler.get_job(id, jobstore)
 
         if not job:
             raise LookupError(id)
 
         job.func(*job.args, **job.kwargs)
 
-    def __load_config(self):
+    def authenticate(self, func):
+        """
+        A decorator that is used to register a function to authenticate a user.
+        :param func: The callback to authenticate.
+        """
+        self._authentication_callback = func
+        return func
+
+    def _load_config(self):
         """Loads the configuration from the Flask configuration."""
 
         options = dict()
@@ -216,12 +228,14 @@ class APScheduler(object):
         if timezone:
             options['timezone'] = timezone
 
-        self.__scheduler.configure(**options)
+        self._scheduler.configure(**options)
 
-        self.__allowed_hosts = self.app.config.get('SCHEDULER_ALLOWED_HOSTS', self.__allowed_hosts)
-        self.__views_enabled = self.app.config.get('SCHEDULER_VIEWS_ENABLED', self.__views_enabled)
+        self._auth_enabled = self.app.config.get('SCHEDULER_AUTH_ENABLED', self._auth_enabled)
+        self._api_enabled = self.app.config.get('SCHEDULER_VIEWS_ENABLED', self._api_enabled)  # for compatibility reason
+        self._api_enabled = self.app.config.get('SCHEDULER_API_ENABLED', self._api_enabled)
+        self._allowed_hosts = self.app.config.get('SCHEDULER_ALLOWED_HOSTS', self._allowed_hosts)
 
-    def __load_jobs(self):
+    def _load_jobs(self):
         """Loads the job definitions from the Flask configuration."""
 
         jobs = self.app.config.get('SCHEDULER_JOBS')
@@ -236,6 +250,51 @@ class APScheduler(object):
             else:
                 for job in jobs:
                     self.add_job(**job)
+
+    def _load_api(self):
+        """Adds the routes for the scheduler API."""
+        self.app.add_url_rule('/scheduler', 'get_scheduler_info', self._apply_auth(api.get_scheduler_info))
+        self.app.add_url_rule('/scheduler/jobs', 'add_job', self._apply_auth(api.add_job), methods=['POST'])
+        self.app.add_url_rule('/scheduler/jobs', 'get_jobs', self._apply_auth(api.get_jobs))
+        self.app.add_url_rule('/scheduler/jobs/reload_jobs', 'reload_jobs', self._apply_auth(api.reload_jobs), methods=['POST'])
+        self.app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', self._apply_auth(api.get_job))
+        self.app.add_url_rule('/scheduler/jobs/<job_id>', 'delete_job', self._apply_auth(api.delete_job), methods=['DELETE'])
+        self.app.add_url_rule('/scheduler/jobs/<job_id>', 'update_job', self._apply_auth(api.update_job), methods=['PATCH'])
+        self.app.add_url_rule('/scheduler/jobs/<id>/reschedule', 'reschedule_job', self._apply_auth(api.reschedule_job), methods=['PATCH'])
+        self.app.add_url_rule('/scheduler/jobs/<id>/reschedule_once', 'reschedule_job_once', self._apply_auth(api.reschedule_job_once), methods=['PATCH'])
+        self.app.add_url_rule('/scheduler/jobs/<job_id>/pause', 'pause_job', self._apply_auth(api.pause_job), methods=['POST'])
+        self.app.add_url_rule('/scheduler/jobs/<job_id>/resume', 'resume_job', self._apply_auth(api.resume_job), methods=['POST'])
+        self.app.add_url_rule('/scheduler/jobs/<job_id>/run', 'run_job', self._apply_auth(api.run_job), methods=['POST'])
+
+    def _apply_auth(self, view_func):
+        """
+        Apply decorator to authenticate the user who is making the request.
+        :param view_func: The flask view func.
+        """
+        @functools.wraps(view_func)
+        def decorated(*args, **kwargs):
+            if not self._auth_enabled:
+                return view_func(*args, **kwargs)
+
+            auth = request.authorization
+
+            if not auth:
+                return self._handle_authentication_error()
+
+            if not self._authentication_callback or not self._authentication_callback(auth):
+                return self._handle_authentication_error()
+
+            return view_func(*args, **kwargs)
+
+        return decorated
+
+    def _handle_authentication_error(self):
+        """
+        Return an authentication error.
+        """
+        response = make_response('Unauthorized access')
+        response.status_code = 401
+        return response
 
     def create_job_loggers(self, jobs):
         """Creates a logger for each job using the job id as logger name. Adds a file handler for each job logger. Uses
@@ -268,9 +327,9 @@ class APScheduler(object):
         the normal trigger schedule as defined in the job definitions. Requires the job definition path in the request
         body."""
         jobs = self.loadconfig(configpath)
-        self.__scheduler.reschedule_job(id, **data)
+        self._scheduler.reschedule_job(id, **data)
         modify_kwargs = self.fix_trigger([x for x in jobs if x["id"] == id][0])
-        modify_kwargs = self.remove_trigger_kwargs(**modify_kwargs)
+        modify_kwargs = self.remove_trigger_kwargs(modify_kwargs)
         modify_kwargs = self.rename_dictkey(modify_kwargs, "id", "job_id")
         self.scheduler.modify_job(**modify_kwargs)
 
@@ -315,9 +374,9 @@ class APScheduler(object):
         x[new] = x.pop(old)
         return x
 
-    def reload_jobs(self, configpath=None, jobs=None, reschedule_changed_jobs=False):
+    def reload_jobs(self, configpath=None, jobs=None, reschedule_all=False):
         """Goes through all defined jobs and checks if they're in the jobstore, if not they're added. Applies any job
-        definition changes. If reschedule_changed_jobs is True, then it also reschedules all jobs with the current
+        definition changes. If reschedule_all is True, then it also reschedules all jobs with the current
         defined trigger. Jobstore jobs, that are not in our job definitions are removed. 
         Example for the configpath parameter: 'somemodule.somefile.myconfdict'."""
         if configpath:
@@ -339,7 +398,7 @@ class APScheduler(object):
                 modify_kwargs = self.fix_trigger(modify_kwargs)
                 modify_kwargs = self.remove_trigger_kwargs(modify_kwargs)
                 self.scheduler.modify_job(**modify_kwargs)  # "default"
-                if reschedule_changed_jobs in ["true", "True"]:
+                if reschedule_all in ["true", "True"]:
                     self.scheduler.reschedule_job(**reschedule_kwargs)  # jobstore="default"
                 LOGGER.debug("Job already in jobstore. Updated possible definitions changes.")
             else:   
@@ -349,19 +408,3 @@ class APScheduler(object):
         for x in jobstore_ids:
             if x not in [x["id"] for x in jobs]:
                 self.delete_job(x)
-
-    def __load_views(self):
-        """Adds the routes for the scheduler UI."""
-
-        self.app.add_url_rule('/scheduler', 'get_scheduler_info', views.get_scheduler_info)
-        self.app.add_url_rule('/scheduler/jobs', 'add_job', views.add_job, methods=['POST'])
-        self.app.add_url_rule('/scheduler/jobs', 'get_jobs', views.get_jobs)
-        self.app.add_url_rule('/scheduler/jobs/reload_jobs', 'reload_jobs', views.reload_jobs, methods=['POST'])
-        self.app.add_url_rule('/scheduler/jobs/<id>', 'get_job', views.get_job)
-        self.app.add_url_rule('/scheduler/jobs/<id>', 'delete_job', views.delete_job, methods=['DELETE'])
-        self.app.add_url_rule('/scheduler/jobs/<id>', 'update_job', views.update_job, methods=['PATCH'])
-        self.app.add_url_rule('/scheduler/jobs/<id>/reschedule', 'reschedule_job', views.reschedule_job, methods=['PATCH'])
-        self.app.add_url_rule('/scheduler/jobs/<id>/reschedule_once', 'reschedule_job_once', views.reschedule_job_once, methods=['PATCH'])
-        self.app.add_url_rule('/scheduler/jobs/<id>/pause', 'pause_job', views.pause_job, methods=['POST'])
-        self.app.add_url_rule('/scheduler/jobs/<id>/resume', 'resume_job', views.resume_job, methods=['POST'])
-        self.app.add_url_rule('/scheduler/jobs/<id>/run', 'run_job', views.run_job, methods=['POST'])
