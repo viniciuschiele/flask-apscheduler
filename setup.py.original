@@ -1,18 +1,16 @@
-"""Temporary package for my own usage. Notice different requirements: apscheduler==3.0.5"""
-
 from setuptools import setup
 
 setup(
-    name='Flask-APScheduler_fork',
-    version='1.5.3',
+    name='Flask-APScheduler',
+    version='1.5.0',
     packages=['flask_apscheduler'],
-    url='https://github.com/eayin2/flask-apscheduler',
+    url='https://github.com/viniciuschiele/flask-apscheduler',
     license='Apache 2.0',
-    author='Eayin',
-    author_email='eayin2@gmail.com',
-    description='Test package and a fork of flask_apscheduler.',
+    author='Vinicius Chiele',
+    author_email='vinicius.chiele@gmail.com',
+    description='Adds APScheduler support to Flask',
     keywords=['apscheduler', 'scheduler', 'scheduling', 'cron'],
-    install_requires=['flask>=0.10.1', 'apscheduler==3.0.5', 'python-dateutil>=2.4.2'],
+    install_requires=['flask>=0.10.1', 'apscheduler>=3.2.0', 'python-dateutil>=2.4.2'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
