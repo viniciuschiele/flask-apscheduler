@@ -14,7 +14,7 @@ class Config(object):
     ]
 
     SCHEDULER_ALLOWED_HOSTS = ['my_servers_name']
-    SCHEDULER_VIEWS_ENABLED = True
+    SCHEDULER_API_ENABLED = True
 
 
 def job1(a, b):
@@ -25,6 +25,8 @@ app = Flask(__name__)
 app.config.from_object(Config())
 
 scheduler = APScheduler()
+# it is also possible to set the list of servers directly
+# scheduler.allowed_hosts = ['my_servers_name']
 scheduler.init_app(app)
 scheduler.start()
 

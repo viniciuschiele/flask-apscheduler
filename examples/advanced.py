@@ -27,7 +27,7 @@ class Config(object):
         'max_instances': 3
     }
 
-    SCHEDULER_VIEWS_ENABLED = True
+    SCHEDULER_API_ENABLED = True
 
 
 def job1(a, b):
@@ -35,7 +35,6 @@ def job1(a, b):
 
 app = Flask(__name__)
 app.config.from_object(Config())
-app.debug = True
 
 scheduler = APScheduler()
 scheduler.init_app(app)

@@ -13,7 +13,7 @@ class Config(object):
         }
     ]
 
-    SCHEDULER_VIEWS_ENABLED = True
+    SCHEDULER_API_ENABLED = True
 
 
 def job1(a, b):
@@ -21,9 +21,10 @@ def job1(a, b):
 
 app = Flask(__name__)
 app.config.from_object(Config())
-app.debug = True
 
 scheduler = APScheduler()
+# it is also possible to enable the API directly
+# scheduler.api_enabled = True
 scheduler.init_app(app)
 scheduler.start()
 
