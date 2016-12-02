@@ -270,7 +270,7 @@ class APScheduler(object):
             if not self.auth:
                 return view_func(*args, **kwargs)
 
-            auth_data = self.auth.get_auth()
+            auth_data = self.auth.get_authorization()
 
             if auth_data is None:
                 return self._handle_authentication_error()
@@ -286,6 +286,7 @@ class APScheduler(object):
         """
         Return an authentication error.
         """
-        response = make_response('Unauthorized access')
+        response = make_response('Access Denied')
+        response.headers['WWW-Authenticate'] = self.auth.get_authenticate_header()
         response.status_code = 401
         return response

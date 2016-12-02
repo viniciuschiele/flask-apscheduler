@@ -41,14 +41,14 @@ def get_authorization_header():
     return auth_type, auth_info
 
 
-class Authentication(dict):
+class Authorization(dict):
     """
-    A class to hold the authentication data.
+    A class to hold the authorization data.
 
-    :param str auth_type: The authentication type. e.g: basic, bearer.
+    :param str auth_type: The authorization type. e.g: basic, bearer.
     """
     def __init__(self, auth_type, **kwargs):
-        super(Authentication, self).__init__(**kwargs)
+        super(Authorization, self).__init__(**kwargs)
 
         self.auth_type = auth_type
 
@@ -56,28 +56,30 @@ class Authentication(dict):
 class HTTPAuth(object):
     """
     A base class from which all authentication classes should inherit.
-
-    :param str auth_type: The authentication type. e.g: basic, bearer.
     """
-    def __init__(self, auth_type):
-        self.type = auth_type
 
-    def get_auth(self):
+    def get_authorization(self):
         """
-        Get the authentication header.
+        Get the authorization header.
         :return Authentication: The authentication data or None if it is not present or invalid.
         """
         raise NotImplemented()
+
+    def get_authenticate_header(self):
+        """
+        Return the value of `WWW-Authenticate` header in a
+        `401 Unauthenticated` response.
+        """
+        pass
 
 
 class HTTPBasicAuth(HTTPAuth):
     """
     HTTP Basic authentication.
     """
-    def __init__(self):
-        super(HTTPBasicAuth, self).__init__('Basic')
+    www_authenticate_realm = 'Authentication Required'
 
-    def get_auth(self):
+    def get_authorization(self):
         """
         Get the username and password for Basic authentication header.
         :return Authentication: The authentication data or None if it is not present or invalid.
@@ -97,4 +99,11 @@ class HTTPBasicAuth(HTTPAuth):
         except Exception:
             return None
 
-        return Authentication('basic', username=bytes_to_wsgi(username), password=bytes_to_wsgi(password))
+        return Authorization('basic', username=bytes_to_wsgi(username), password=bytes_to_wsgi(password))
+
+    def get_authenticate_header(self):
+        """
+        Return the value of `WWW-Authenticate` header in a
+        `401 Unauthenticated` response.
+        """
+        return 'Basic realm="%s"' % self.www_authenticate_realm
