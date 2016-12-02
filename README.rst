@@ -11,10 +11,11 @@ Features
 - Loads job definitions from Flask configuration.
 - Allows to specify the hostname which the scheduler will run on.
 - Provides a REST API to manage the scheduled jobs.
+- Provides authentication for the REST API.
 
 Documentation
 ===============
-Soon... take a look at the examples_ to see how it works.
+Take a look at the examples_ to see how it works.
 
 Installation
 ===============
