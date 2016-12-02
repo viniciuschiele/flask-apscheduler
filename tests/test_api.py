@@ -1,15 +1,18 @@
+import base64
 import json
 
 from flask import Flask
 from flask_apscheduler import APScheduler
+from flask_apscheduler.auth import HTTPBasicAuth
 from unittest import TestCase
 
 
-class TestViews(TestCase):
+class TestAPI(TestCase):
     def setUp(self):
         self.app = Flask(__name__)
-        self.app.config['SCHEDULER_VIEWS_ENABLED'] = True
-        self.scheduler = APScheduler(app=self.app)
+        self.scheduler = APScheduler()
+        self.scheduler.api_enabled = True
+        self.scheduler.init_app(self.app)
         self.scheduler.start()
         self.client = self.app.test_client()
 
@@ -24,7 +27,7 @@ class TestViews(TestCase):
     def test_add_job(self):
         job = {
             'id': 'job1',
-            'func': 'tests.test_views:job1',
+            'func': 'tests.test_api:job1',
             'trigger': 'date',
             'run_date': '2020-12-01T12:30:01+00:00',
         }
@@ -42,7 +45,7 @@ class TestViews(TestCase):
     def test_add_conflicted_job(self):
         job = {
             'id': 'job1',
-            'func': 'tests.test_views:job1',
+            'func': 'tests.test_api:job1',
             'trigger': 'date',
             'run_date': '2020-12-01T12:30:01+00:00',
         }
@@ -186,7 +189,7 @@ class TestViews(TestCase):
     def __add_job(self):
         job = {
             'id': 'job1',
-            'func': 'tests.test_views:job1',
+            'func': 'tests.test_api:job1',
             'trigger': 'interval',
             'minutes': 10,
         }
@@ -195,6 +198,42 @@ class TestViews(TestCase):
         return json.loads(response.get_data(as_text=True))
 
 
+class TestHTTPBasicAuh(TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.scheduler = APScheduler()
+        self.scheduler.auth = HTTPBasicAuth()
+        self.scheduler.api_enabled = True
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        self.scheduler.authenticate(self._authenticate)
+        self.client = self.app.test_client()
+
+    def _authenticate(self, auth):
+        return auth['username'] == 'test' and auth['password'] == 'test'
+
+    def test_valid_credentials(self):
+        headers = {'Authorization': 'Basic ' + base64.b64encode(b'test:test').decode('ascii')}
+        response = self.client.get('/scheduler', headers=headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_invalid_credentials(self):
+        headers = {'Authorization': 'Basic ' + base64.b64encode(b'guest:guest').decode('ascii')}
+        response = self.client.get('/scheduler', headers=headers)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.headers['WWW-Authenticate'], 'Basic realm="Authentication Required"')
+
+    def test_invalid_header_format(self):
+        headers = {'Authorization': 'Basic 1231234'}
+        response = self.client.get('/scheduler', headers=headers)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.headers['WWW-Authenticate'], 'Basic realm="Authentication Required"')
+
+    def test_missing_credentials(self):
+        response = self.client.get('/scheduler')
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.headers['WWW-Authenticate'], 'Basic realm="Authentication Required"')
+
+
 def job1(x=0):
     print(x)
-

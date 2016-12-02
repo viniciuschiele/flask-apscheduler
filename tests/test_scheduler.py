@@ -36,7 +36,7 @@ class TestScheduler(TestCase):
         self.app.config['JOBS'] = [
             {
                 'id': 'job1',
-                'func': 'tests.test_views:job1',
+                'func': 'tests.test_api:job1',
                 'trigger': 'interval',
                 'seconds': 10
             }
