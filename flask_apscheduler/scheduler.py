@@ -22,7 +22,7 @@ from logging.handlers import RotatingFileHandler
 
 import apscheduler
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import make_response, request
+from flask import make_response
 from . import api
 from .utils import fix_job_def, pop_trigger
 
@@ -34,13 +34,12 @@ class APScheduler(object):
 
     def __init__(self, scheduler=None, app=None):
         self._scheduler = scheduler or BackgroundScheduler()
-        self._allowed_hosts = ['*']
-        self._auth_enabled = False
-        self._api_enabled = False
-
         self._host_name = socket.gethostname().lower()
         self._authentication_callback = None
 
+        self.allowed_hosts = ['*']
+        self.auth = None
+        self.api_enabled = False
         self.app = None
 
         if app:
@@ -48,36 +47,31 @@ class APScheduler(object):
 
     @property
     def host_name(self):
-        """Gets the host name."""
+        """Get the host name."""
         return self._host_name
 
     @property
-    def allowed_hosts(self):
-        """Gets the allowed hosts."""
-        return self._allowed_hosts
-
-    @property
     def running(self):
-        """Gets true whether the scheduler is running."""
+        """Get true whether the scheduler is running."""
         return self.scheduler.running
 
     @property
     def scheduler(self):
-        """Gets the base scheduler."""
+        """Get the base scheduler."""
         return self._scheduler
 
     def init_app(self, app):
-        """Initializes the APScheduler with a Flask application instance."""
+        """Initialize the APScheduler with a Flask application instance."""
 
         self.app = app
         self.app.apscheduler = self
 
         self._load_config()
-        if self._api_enabled:
+        if self.api_enabled:
             self._load_api()
 
     def start(self):
-        """Starts the scheduler."""
+        """Start the scheduler."""
 
         if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:
             LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
@@ -89,7 +83,7 @@ class APScheduler(object):
 
     def shutdown(self, wait=True):
         """
-        Shuts down the scheduler. Does not interrupt any currently running jobs.
+        Shut down the scheduler. Does not interrupt any currently running jobs.
 
         :param bool wait: ``True`` to wait until all currently executing jobs have finished
         :raises SchedulerNotRunningError: if the scheduler has not been started yet
@@ -99,7 +93,7 @@ class APScheduler(object):
 
     def add_job(self, id, func, **kwargs):
         """
-        Adds the given job to the job list and wakes up the scheduler if it's already running.
+        Add the given job to the job list and wakes up the scheduler if it's already running.
 
         :param str id: explicit identifier for the job (for modifying it later)
         :param func: callable (or a textual reference to one) to run at the given time
@@ -116,7 +110,7 @@ class APScheduler(object):
 
     def delete_job(self, id, jobstore=None):
         """
-        Removes a job, preventing it from being run any more.
+        Remove a job, preventing it from being run any more.
 
         :param str id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
@@ -126,7 +120,7 @@ class APScheduler(object):
 
     def delete_all_jobs(self, jobstore=None):
         """
-        Removes all jobs from the specified job store, or all job stores if none is given.
+        Remove all jobs from the specified job store, or all job stores if none is given.
         
         :param str|unicode jobstore: alias of the job store
         """
@@ -135,7 +129,7 @@ class APScheduler(object):
 
     def get_job(self, id, jobstore=None):
         """
-        Returns the Job that matches the given ``id``.
+        Return the Job that matches the given ``id``.
 
         :param str id: the identifier of the job
         :param str jobstore: alias of the job store that most likely contains the job
@@ -147,7 +141,7 @@ class APScheduler(object):
 
     def get_jobs(self, jobstore=None):
         """
-        Returns a list of pending jobs (if the scheduler hasn't been started yet) and scheduled jobs, either from a
+        Return a list of pending jobs (if the scheduler hasn't been started yet) and scheduled jobs, either from a
         specific job store or from all of them.
 
         :param str jobstore: alias of the job store
@@ -158,7 +152,7 @@ class APScheduler(object):
 
     def modify_job(self, id, jobstore=None, **changes):
         """
-        Modifies the properties of a single job. Modifications are passed to this method as extra keyword arguments.
+        Modify the properties of a single job. Modifications are passed to this method as extra keyword arguments.
 
         :param str id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
@@ -174,7 +168,7 @@ class APScheduler(object):
 
     def pause_job(self, id, jobstore=None):
         """
-        Causes the given job not to be executed until it is explicitly resumed.
+        Pause the given job until it is explicitly resumed.
 
         :param str id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
@@ -184,7 +178,7 @@ class APScheduler(object):
 
     def resume_job(self, id, jobstore=None):
         """
-        Resumes the schedule of the given job, or removes the job if its schedule is finished.
+        Resume the schedule of the given job, or removes the job if its schedule is finished.
 
         :param str id: the identifier of the job
         :param str jobstore: alias of the job store that contains the job
@@ -230,10 +224,11 @@ class APScheduler(object):
 
         self._scheduler.configure(**options)
 
-        self._auth_enabled = self.app.config.get('SCHEDULER_AUTH_ENABLED', self._auth_enabled)
-        self._api_enabled = self.app.config.get('SCHEDULER_VIEWS_ENABLED', self._api_enabled)  # for compatibility reason
-        self._api_enabled = self.app.config.get('SCHEDULER_API_ENABLED', self._api_enabled)
-        self._allowed_hosts = self.app.config.get('SCHEDULER_ALLOWED_HOSTS', self._allowed_hosts)
+
+        self.auth = self.app.config.get('SCHEDULER_AUTH', self.auth)
+        self.api_enabled = self.app.config.get('SCHEDULER_VIEWS_ENABLED', self.api_enabled)  # for compatibility reason
+        self.api_enabled = self.app.config.get('SCHEDULER_API_ENABLED', self.api_enabled)
+        self.allowed_hosts = self.app.config.get('SCHEDULER_ALLOWED_HOSTS', self.allowed_hosts)
 
     def _load_jobs(self):
         """Loads the job definitions from the Flask configuration."""
@@ -252,7 +247,7 @@ class APScheduler(object):
                     self.add_job(**job)
 
     def _load_api(self):
-        """Adds the routes for the scheduler API."""
+        """Add the routes for the scheduler API."""
         self.app.add_url_rule('/scheduler', 'get_scheduler_info', self._apply_auth(api.get_scheduler_info))
         self.app.add_url_rule('/scheduler/jobs', 'add_job', self._apply_auth(api.add_job), methods=['POST'])
         self.app.add_url_rule('/scheduler/jobs', 'get_jobs', self._apply_auth(api.get_jobs))
@@ -273,15 +268,15 @@ class APScheduler(object):
         """
         @functools.wraps(view_func)
         def decorated(*args, **kwargs):
-            if not self._auth_enabled:
+            if not self.auth:
                 return view_func(*args, **kwargs)
 
-            auth = request.authorization
+            auth_data = self.auth.get_authorization()
 
-            if not auth:
+            if auth_data is None:
                 return self._handle_authentication_error()
 
-            if not self._authentication_callback or not self._authentication_callback(auth):
+            if not self._authentication_callback or not self._authentication_callback(auth_data):
                 return self._handle_authentication_error()
 
             return view_func(*args, **kwargs)
@@ -292,7 +287,8 @@ class APScheduler(object):
         """
         Return an authentication error.
         """
-        response = make_response('Unauthorized access')
+        response = make_response('Access Denied')
+        response.headers['WWW-Authenticate'] = self.auth.get_authenticate_header()
         response.status_code = 401
         return response
 
