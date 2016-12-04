@@ -71,11 +71,8 @@ def get_job(id):
 
 def reload_jobs():
     """Reloads all jobs, see flask_apscheduler.APScheduler.reload_jobs()."""
-    data = request.get_json(force=True)
-
     try:
-        current_app.apscheduler.reload_jobs(**data)
-        return get_jobs()
+        return jsonify(current_app.apscheduler.reload_jobs())
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
 

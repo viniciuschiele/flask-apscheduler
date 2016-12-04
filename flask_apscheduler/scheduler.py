@@ -225,6 +225,7 @@ class APScheduler(object):
         self._scheduler.configure(**options)
 
 
+        self.jobconfig = self.app.config.get('SCHEDULER_JOBCONFIG', None)  # Textual reference to the jobs dictionary.
         self.auth = self.app.config.get('SCHEDULER_AUTH', self.auth)
         self.api_enabled = self.app.config.get('SCHEDULER_VIEWS_ENABLED', self.api_enabled)  # for compatibility reason
         self.api_enabled = self.app.config.get('SCHEDULER_API_ENABLED', self.api_enabled)
@@ -293,8 +294,10 @@ class APScheduler(object):
         return response
 
     def create_job_loggers(self, jobs):
-        """Creates a logger for each job using the job id as logger name. Adds a file handler for each job logger. Uses
-        the JOBLOG_PATH from your Flask config class."""
+        """Creates a logger for each job using the job id as logger name.
+
+        Adds a file handler for each job logger. Uses the JOBLOG_PATH from your Flask config class.
+        """
         self.add_filehandler("apscheduler.executors.default")
         self.add_filehandler("apscheduler.scheduler")
         self.add_filehandler("flask_apscheduler")
@@ -318,11 +321,17 @@ class APScheduler(object):
             logger.removeHandler(hdlr)
         logger.addHandler(fileh)
 
-    def reschedule_job_once(self, id, configpath, **data):
-        """Reschedules a job once, so it runs next time with the given trigger, but the after next run will have again
-        the normal trigger schedule as defined in the job definitions. Requires the job definition path in the request
-        body."""
-        jobs = self.loadconfig(configpath)
+    def reschedule_job_once(self, id, **data):
+        """Reschedules a job once.
+
+        So it runs next time with the given trigger, but the after next run will have again the normal trigger schedule
+        as defined in the job definitions. Requires the job definition path in the request body.
+        """
+        if self.jobconfig:
+            jobs = self.loadconfig(self.jobconfig)
+        else:
+            LOGGER.error("Please provide 'SCHEDULER_JOBCONFIG' in your scheduler configuration.")
+            return None            
         self._scheduler.reschedule_job(id, **data)
         modify_kwargs = self.fix_trigger([x for x in jobs if x["id"] == id][0])
         modify_kwargs = self.remove_trigger_kwargs(modify_kwargs)
@@ -330,8 +339,10 @@ class APScheduler(object):
         self.scheduler.modify_job(**modify_kwargs)
 
     def get_trigger_kwargs(self, func, trigger, id=None, job_id=None, name=None, coalesce=None, misfire_grace_time=None, max_instances=None, next_run_time=None, **kwargs):
-        """Returns trigger kwargs. It'd be better to put the trigger kwargs into a subdictionary though, than extracting
-        them like this."""
+        """Returns trigger kwargs. 
+
+        It'd be better to put the trigger kwargs into a subdictionary though, than extracting them like this.
+        """
         if kwargs:
             return kwargs
         else:
@@ -344,17 +355,22 @@ class APScheduler(object):
             [x.pop(k) for k, v in kwargs.items()]
         return x
 
-    def loadconfig(self, configpath):
-        """Returns the job definition dictionary from given configpath. importlib.reload() ensures to reimport each
-        time."""
-        mod, var = configpath.rsplit(".", 1)
+    def loadconfig(self, ref):
+        """Returns the job definition dictionary from the given textual reference.
+
+        Example for the textual reference: 'somemodule.somefile.myconfdict'.
+        importlib.reload() ensures to reimport each time.
+        """
+        mod, var = ref.rsplit(".", 1)
         mod = importlib.reload(importlib.import_module(mod))
         jobs = getattr(mod, var)
         return jobs
 
     def fix_trigger(self, kwargs):
-        """Replaces the trigger string value for the triggers 'interval', 'date' and 'cron' with their actual
-        class instance. apscheduler.modify_job() for example wants the trigger as an object and not string."""
+        """Replaces the trigger string value for the triggers 'interval', 'date' and 'cron' with their class instance.
+
+        apscheduler.modify_job() for example wants the trigger as an object and not string.
+        """
         trigger_kwargs = self.get_trigger_kwargs(**kwargs)
         if kwargs["trigger"] == "interval":
             kwargs["trigger"] = apscheduler.triggers.interval.IntervalTrigger(**trigger_kwargs)
@@ -370,18 +386,20 @@ class APScheduler(object):
         x[new] = x.pop(old)
         return x
 
-    def reload_jobs(self, configpath=None, jobs=None, reschedule_all=False):
-        """Goes through all defined jobs and checks if they're in the jobstore, if not they're added. Applies any job
-        definition changes. If reschedule_all is True, then it also reschedules all jobs with the current
-        defined trigger. Jobstore jobs, that are not in our job definitions are removed. 
-        Example for the configpath parameter: 'somemodule.somefile.myconfdict'."""
-        if configpath:
-            jobs = self.loadconfig(configpath)
+    def reload_jobs(self, jobs=None, reschedule_all=False):
+        """Go through all defined jobs and check if they're in the jobstore, if not add them.
+
+        Apply any job definition changes. If reschedule_all is True, then also reschedule all jobs with the current
+        defined trigger. Jobstore jobs, that are not in the job definitions are removed.
+        """
+        if self.jobconfig:
+            jobs = self.loadconfig(self.jobconfig)
         elif jobs:
             pass
         else:
-            LOGGER.error("Please provide either a configpath or a list with the job definitions.")
-            return None
+            jobconfig_err = "Please provide 'SCHEDULER_JOBCONFIG' in your scheduler configuration."
+            LOGGER.error(jobconfig_err)
+            return {"error": jobconfig_err}
         jobstore_ids = [j.id for j in self.scheduler.get_jobs()]
         joblog_path = self.app.config.get('JOBLOG_PATH')
         if joblog_path:
@@ -393,9 +411,9 @@ class APScheduler(object):
             if x["id"] in jobstore_ids:
                 modify_kwargs = self.fix_trigger(modify_kwargs)
                 modify_kwargs = self.remove_trigger_kwargs(modify_kwargs)
-                self.scheduler.modify_job(**modify_kwargs)  # "default"
+                self.scheduler.modify_job(**modify_kwargs)
                 if reschedule_all in ["true", "True"]:
-                    self.scheduler.reschedule_job(**reschedule_kwargs)  # jobstore="default"
+                    self.scheduler.reschedule_job(**reschedule_kwargs)
                 LOGGER.debug("Job already in jobstore. Updated possible definitions changes.")
             else:   
                 LOGGER.debug("Added schedule for: {0}".format(x["id"]))
@@ -404,3 +422,4 @@ class APScheduler(object):
         for x in jobstore_ids:
             if x not in [x["id"] for x in jobs]:
                 self.delete_job(x)
+        return self.get_jobs()
