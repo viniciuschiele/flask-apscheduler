@@ -18,6 +18,7 @@ import functools
 import logging
 import socket
 
+from apscheduler.events import EVENT_ALL
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import make_response
 from . import api
@@ -50,7 +51,7 @@ class APScheduler(object):
     @property
     def running(self):
         """Get true whether the scheduler is running."""
-        return self.scheduler.running
+        return self._scheduler.running
 
     @property
     def scheduler(self):
@@ -88,6 +89,27 @@ class APScheduler(object):
         """
 
         self._scheduler.shutdown(wait)
+
+    def add_listener(self, callback, mask=EVENT_ALL):
+        """
+        Add a listener for scheduler events.
+
+        When a matching event  occurs, ``callback`` is executed with the event object as its
+        sole argument. If the ``mask`` parameter is not provided, the callback will receive events
+        of all types.
+
+        For further info: https://apscheduler.readthedocs.io/en/latest/userguide.html#scheduler-events
+
+        :param callback: any callable that takes one argument
+        :param int mask: bitmask that indicates which events should be listened to
+        """
+        self._scheduler.add_listener(callback, mask)
+
+    def remove_listener(self, callback):
+        """
+        Remove a previously added event listener.
+        """
+        self._scheduler.remove_listener(callback)
 
     def add_job(self, id, func, **kwargs):
         """
