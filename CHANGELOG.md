@@ -1,5 +1,9 @@
 # Changelog
 
+### Version 1.6.0
+ - Add support for authentication to the API.
+ - Add support for event listeners to the scheduler.
+
 ### Version 1.5.0
  - Set a min version for all the dependencies (Issue #18)
 

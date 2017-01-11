@@ -27,6 +27,9 @@ Feedback
 ===============
 Please use the Issues_ for feature requests and troubleshooting usage.
 
+.. |Version| image:: https://img.shields.io/pypi/v/flask-apscheduler.svg
+   :target: https://pypi.python.org/pypi/Flask-APScheduler
+
 .. |Coverage| image:: https://codecov.io/github/viniciuschiele/flask-apscheduler/coverage.svg
     :target: https://codecov.io/github/viniciuschiele/flask-apscheduler
 
@@ -35,9 +38,6 @@ Please use the Issues_ for feature requests and troubleshooting usage.
 
 .. |CodeClimate| image:: https://codeclimate.com/github/viniciuschiele/flask-apscheduler/badges/gpa.svg
    :target: https://codeclimate.com/github/viniciuschiele/flask-apscheduler
-
-.. |Version| image:: https://badge.fury.io/py/flask-apscheduler.svg
-   :target: http://badge.fury.io/py/flask-apscheduler
 
 .. _examples: https://github.com/viniciuschiele/flask-apscheduler/tree/master/examples
 
