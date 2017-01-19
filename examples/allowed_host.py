@@ -20,14 +20,14 @@ class Config(object):
 def job1(a, b):
     print(str(a) + ' ' + str(b))
 
+if __name__ == '__main__':
+    app = Flask(__name__)
+    app.config.from_object(Config())
 
-app = Flask(__name__)
-app.config.from_object(Config())
+    scheduler = APScheduler()
+    # it is also possible to set the list of servers directly
+    # scheduler.allowed_hosts = ['my_servers_name']
+    scheduler.init_app(app)
+    scheduler.start()
 
-scheduler = APScheduler()
-# it is also possible to set the list of servers directly
-# scheduler.allowed_hosts = ['my_servers_name']
-scheduler.init_app(app)
-scheduler.start()
-
-app.run()
+    app.run()

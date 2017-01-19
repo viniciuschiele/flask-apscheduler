@@ -22,19 +22,18 @@ def job1(a, b):
     print(str(a) + ' ' + str(b))
 
 
-app = Flask(__name__)
-app.config.from_object(Config())
+if __name__ == '__main__':
+    app = Flask(__name__)
+    app.config.from_object(Config())
 
-scheduler = APScheduler()
-# it is also possible to set the authentication directly
-# scheduler.auth = HTTPBasicAuth()
-scheduler.init_app(app)
-scheduler.start()
+    scheduler = APScheduler()
+    # it is also possible to set the authentication directly
+    # scheduler.auth = HTTPBasicAuth()
+    scheduler.init_app(app)
+    scheduler.start()
 
+    @scheduler.authenticate
+    def authenticate(auth):
+        return auth['username'] == 'guest' and auth['password'] == 'guest'
 
-@scheduler.authenticate
-def authenticate(auth):
-    return auth['username'] == 'guest' and auth['password'] == 'guest'
-
-
-app.run()
+    app.run()
