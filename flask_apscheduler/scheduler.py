@@ -71,8 +71,9 @@ class APScheduler(object):
             self._load_api()
 
     def start(self):
-        """Start the scheduler."""
-
+        """
+        Start the scheduler.
+        """
         if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:
             LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
                          (self.host_name, ','.join(self.allowed_hosts)))
@@ -89,6 +90,21 @@ class APScheduler(object):
         """
 
         self._scheduler.shutdown(wait)
+
+    def pause(self):
+        """
+        Pause job processing in the scheduler.
+
+        This will prevent the scheduler from waking up to do job processing until :meth:`resume`
+        is called. It will not however stop any already running job processing.
+        """
+        self._scheduler.pause()
+
+    def resume(self):
+        """
+        Resume job processing in the scheduler.
+        """
+        self._scheduler.resume()
 
     def add_listener(self, callback, mask=EVENT_ALL):
         """
