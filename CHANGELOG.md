@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.7.0
+ - Add methods to pause and resume scheduler.
+
 ### Version 1.6.0
  - Add support for authentication to the API.
  - Add support for event listeners to the scheduler.
