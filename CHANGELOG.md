@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.7.1
+ - Add possibility to start the scheduler in a paused state.
+
 ### Version 1.7.0
  - Add methods to pause and resume scheduler.
 
