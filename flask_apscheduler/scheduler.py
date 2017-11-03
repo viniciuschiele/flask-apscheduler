@@ -70,16 +70,17 @@ class APScheduler(object):
         if self.api_enabled:
             self._load_api()
 
-    def start(self):
+    def start(self, paused=False):
         """
         Start the scheduler.
+        :param bool paused: if True, don't start job processing until resume is called.
         """
         if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:
             LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
                          (self.host_name, ','.join(self.allowed_hosts)))
             return
 
-        self._scheduler.start()
+        self._scheduler.start(paused=paused)
 
     def shutdown(self, wait=True):
         """
