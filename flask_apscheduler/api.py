@@ -50,7 +50,7 @@ def delete_job(job_id):
     """Deletes a job."""
 
     try:
-        current_app.apscheduler.delete_job(job_id)
+        current_app.apscheduler.remove_job(job_id)
         return Response(status=204)
     except JobLookupError:
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)

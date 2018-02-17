@@ -17,6 +17,7 @@
 import functools
 import logging
 import socket
+import warnings
 
 from apscheduler.events import EVENT_ALL
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -147,6 +148,32 @@ class APScheduler(object):
 
     def delete_job(self, id, jobstore=None):
         """
+        DEPRECATED, use remove_job instead.
+
+        Remove a job, preventing it from being run any more.
+
+        :param str id: the identifier of the job
+        :param str jobstore: alias of the job store that contains the job
+        """
+        warnings.warn('delete_job has been deprecated, use remove_job instead.', DeprecationWarning)
+
+        self.remove_job(id, jobstore)
+
+    def delete_all_jobs(self, jobstore=None):
+        """
+        DEPRECATED, use remove_all_jobs instead.
+
+        Remove all jobs from the specified job store, or all job stores if none is given.
+
+        :param str|unicode jobstore: alias of the job store
+        """
+
+        warnings.warn('delete_all_jobs has been deprecated, use remove_all_jobs instead.', DeprecationWarning)
+
+        self.remove_all_jobs(jobstore)
+
+    def remove_job(self, id, jobstore=None):
+        """
         Remove a job, preventing it from being run any more.
 
         :param str id: the identifier of the job
@@ -155,10 +182,10 @@ class APScheduler(object):
 
         self._scheduler.remove_job(id, jobstore)
 
-    def delete_all_jobs(self, jobstore=None):
+    def remove_all_jobs(self, jobstore=None):
         """
         Remove all jobs from the specified job store, or all job stores if none is given.
-        
+
         :param str|unicode jobstore: alias of the job store
         """
 
