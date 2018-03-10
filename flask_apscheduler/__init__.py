@@ -14,4 +14,5 @@
 
 """Flask extension for APScheduler."""
 
+from apscheduler.schedulers.base import STATE_PAUSED, STATE_RUNNING, STATE_STOPPED
 from .scheduler import APScheduler

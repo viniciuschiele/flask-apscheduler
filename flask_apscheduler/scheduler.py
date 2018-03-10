@@ -55,6 +55,11 @@ class APScheduler(object):
         return self._scheduler.running
 
     @property
+    def state(self):
+        """Get the state of the scheduler."""
+        return self._scheduler.state
+
+    @property
     def scheduler(self):
         """Get the base scheduler."""
         return self._scheduler
