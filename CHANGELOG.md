@@ -1,7 +1,11 @@
 # Changelog
 
+### Version 1.8.0
+ - Add property to get the state of the scheduler.
+ - Deprecate delete_job/delete_all_jobs in favor of remove_job/remove_all_jobs
+
 ### Version 1.7.1
- - Add possibility to start the scheduler in a paused state.
+ - Add possibility to resume the scheduler in paused state.
 
 ### Version 1.7.0
  - Add methods to pause and resume scheduler.
