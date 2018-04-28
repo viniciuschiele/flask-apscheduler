@@ -39,6 +39,7 @@ class APScheduler(object):
         self.allowed_hosts = ['*']
         self.auth = None
         self.api_enabled = False
+        self.api_prefix = ''
         self.app = None
 
         if app:
@@ -302,6 +303,7 @@ class APScheduler(object):
         self.auth = self.app.config.get('SCHEDULER_AUTH', self.auth)
         self.api_enabled = self.app.config.get('SCHEDULER_VIEWS_ENABLED', self.api_enabled)  # for compatibility reason
         self.api_enabled = self.app.config.get('SCHEDULER_API_ENABLED', self.api_enabled)
+        self.api_prefix = self.app.config.get('SCHEDULER_API_PREFIX', self.api_prefix)
         self.allowed_hosts = self.app.config.get('SCHEDULER_ALLOWED_HOSTS', self.allowed_hosts)
 
     def _load_jobs(self):
@@ -321,15 +323,15 @@ class APScheduler(object):
         """
         Add the routes for the scheduler API.
         """
-        self.app.add_url_rule('/scheduler', 'get_scheduler_info', self._apply_auth(api.get_scheduler_info))
-        self.app.add_url_rule('/scheduler/jobs', 'add_job', self._apply_auth(api.add_job), methods=['POST'])
-        self.app.add_url_rule('/scheduler/jobs', 'get_jobs', self._apply_auth(api.get_jobs))
-        self.app.add_url_rule('/scheduler/jobs/<job_id>', 'get_job', self._apply_auth(api.get_job))
-        self.app.add_url_rule('/scheduler/jobs/<job_id>', 'delete_job', self._apply_auth(api.delete_job), methods=['DELETE'])
-        self.app.add_url_rule('/scheduler/jobs/<job_id>', 'update_job', self._apply_auth(api.update_job), methods=['PATCH'])
-        self.app.add_url_rule('/scheduler/jobs/<job_id>/pause', 'pause_job', self._apply_auth(api.pause_job), methods=['POST'])
-        self.app.add_url_rule('/scheduler/jobs/<job_id>/resume', 'resume_job', self._apply_auth(api.resume_job), methods=['POST'])
-        self.app.add_url_rule('/scheduler/jobs/<job_id>/run', 'run_job', self._apply_auth(api.run_job), methods=['POST'])
+        self.app.add_url_rule(self.api_prefix + '/scheduler', 'get_scheduler_info', self._apply_auth(api.get_scheduler_info))
+        self.app.add_url_rule(self.api_prefix + '/scheduler/jobs', 'add_job', self._apply_auth(api.add_job), methods=['POST'])
+        self.app.add_url_rule(self.api_prefix + '/scheduler/jobs', 'get_jobs', self._apply_auth(api.get_jobs))
+        self.app.add_url_rule(self.api_prefix + '/scheduler/jobs/<job_id>', 'get_job', self._apply_auth(api.get_job))
+        self.app.add_url_rule(self.api_prefix + '/scheduler/jobs/<job_id>', 'delete_job', self._apply_auth(api.delete_job), methods=['DELETE'])
+        self.app.add_url_rule(self.api_prefix + '/scheduler/jobs/<job_id>', 'update_job', self._apply_auth(api.update_job), methods=['PATCH'])
+        self.app.add_url_rule(self.api_prefix + '/scheduler/jobs/<job_id>/pause', 'pause_job', self._apply_auth(api.pause_job), methods=['POST'])
+        self.app.add_url_rule(self.api_prefix + '/scheduler/jobs/<job_id>/resume', 'resume_job', self._apply_auth(api.resume_job), methods=['POST'])
+        self.app.add_url_rule(self.api_prefix + '/scheduler/jobs/<job_id>/run', 'run_job', self._apply_auth(api.run_job), methods=['POST'])
 
     def _apply_auth(self, view_func):
         """
