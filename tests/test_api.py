@@ -198,7 +198,26 @@ class TestAPI(TestCase):
         return json.loads(response.get_data(as_text=True))
 
 
-class TestHTTPBasicAuh(TestCase):
+class TestAPIPrefix(TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.scheduler = APScheduler()
+        self.scheduler.api_enabled = True
+        self.scheduler.api_prefix = '/api'
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        self.client = self.app.test_client()
+
+    def test_api_prefix(self):
+        response = self.client.get('/api/scheduler/jobs')
+        self.assertEqual(response.status_code, 200)
+
+    def test_invalid_api_prefix(self):
+        response = self.client.get('/invalidapi/scheduler/jobs')
+        self.assertEqual(response.status_code, 404)
+
+
+class TestHTTPBasicAuth(TestCase):
     def setUp(self):
         self.app = Flask(__name__)
         self.scheduler = APScheduler()
