@@ -114,6 +114,18 @@ def fix_job_def(job_def):
     """
     Replaces the datetime in string by datetime object.
     """
+    if six.PY2 and isinstance(job_def.get('func'), six.text_type):
+        # when a job comes from the endpoint, strings are unicode
+        # because that's how json package deserialize the bytes.
+        # we had a case where APScheduler failed to import the func based
+        # on its name because Py2 expected a str and not unicode on __import__().
+        # it happened only for a user, I wasn't able to determine why that occurred for him,
+        # a workaround is to convert the func to str.
+
+        # full story: https://github.com/viniciuschiele/flask-apscheduler/issues/75
+
+        job_def['func'] = str(job_def.get('func'))
+
     if isinstance(job_def.get('start_date'), six.string_types):
         job_def['start_date'] = dateutil.parser.parse(job_def.get('start_date'))
 
