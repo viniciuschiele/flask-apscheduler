@@ -1,5 +1,9 @@
 # Changelog
 
+### Version 1.9.0
+ - Add support for URL prefix. Thanks [FrEaKmAn](https://github.com/FrEaKmAn).
+ - Fix issue #75
+
 ### Version 1.8.0
  - Add property to get the state of the scheduler.
  - Deprecate delete_job/delete_all_jobs in favor of remove_job/remove_all_jobs
