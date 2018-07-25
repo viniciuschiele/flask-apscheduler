@@ -1,7 +1,8 @@
 import base64
 import json
 
-from flask import Flask
+from werkzeug.routing import BuildError
+from flask import Flask, url_for
 from flask_apscheduler import APScheduler
 from flask_apscheduler.auth import HTTPBasicAuth
 from unittest import TestCase
@@ -215,6 +216,30 @@ class TestAPIPrefix(TestCase):
     def test_invalid_api_prefix(self):
         response = self.client.get('/invalidapi/jobs')
         self.assertEqual(response.status_code, 404)
+
+
+class TestEndpointPrefix(TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.scheduler = APScheduler()
+        self.scheduler.api_enabled = True
+        self.scheduler.endpoint_prefix = 'api.'
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        self.client = self.app.test_client()
+
+    def test_endpoint_prefix(self):
+        with self.scheduler.app.test_request_context():
+            valid_url = True if url_for(self.scheduler.endpoint_prefix + 'get_scheduler_info') else False
+            self.assertTrue(valid_url)
+
+    def test_invalid_endpoint_prefix(self):
+        with self.scheduler.app.test_request_context():
+            try:
+                valid_url = url_for('get_scheduler_info')
+            except BuildError as _:
+                valid_url = False
+            self.assertFalse(valid_url)
 
 
 class TestHTTPBasicAuth(TestCase):
