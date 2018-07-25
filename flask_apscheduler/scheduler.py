@@ -325,56 +325,35 @@ class APScheduler(object):
         """
         Add the routes for the scheduler API.
         """
+        self._add_url_route('get_scheduler_info', '', api.get_scheduler_info, 'GET')
+        self._add_url_route('add_job', '/jobs', api.add_job, 'POST')
+        self._add_url_route('get_job', '/jobs/<job_id>', api.get_job, 'GET')
+        self._add_url_route('get_jobs', '/jobs', api.get_jobs, 'GET')
+        self._add_url_route('delete_job', '/jobs/<job_id>', api.delete_job, 'DELETE')
+        self._add_url_route('update_job', '/jobs/<job_id>', api.update_job, 'PATCH')
+        self._add_url_route('pause_job', '/jobs/<job_id>/pause', api.pause_job, 'POST')
+        self._add_url_route('resume_job', '/jobs/<job_id>/resume', api.resume_job, 'POST')
+        self._add_url_route('run_job', '/jobs/<job_id>/run', api.run_job, 'POST')
+
+    def _add_url_route(self, endpoint, rule, view_func, method):
+        """
+        Add a Flask route.
+        :param str endpoint: The endpoint name.
+        :param str rule: The endpoint url.
+        :param view_func: The endpoint func
+        :param str method: The http method.
+        """
+        if self.api_prefix:
+            rule = self.api_prefix + rule
+
+        if self.endpoint_prefix:
+            endpoint = self.endpoint_prefix + endpoint
+
         self.app.add_url_rule(
-            self.api_prefix + '',
-            self.endpoint_prefix + 'get_scheduler_info',
-            self._apply_auth(api.get_scheduler_info)
-        )
-        self.app.add_url_rule(
-            self.api_prefix + '/jobs',
-            self.endpoint_prefix + 'add_job',
-            self._apply_auth(api.add_job),
-            methods=['POST']
-        )
-        self.app.add_url_rule(
-            self.api_prefix + '/jobs',
-            self.endpoint_prefix + 'get_jobs',
-            self._apply_auth(api.get_jobs)
-        )
-        self.app.add_url_rule(
-            self.api_prefix + '/jobs/<job_id>',
-            self.endpoint_prefix + 'get_job',
-            self._apply_auth(api.get_job)
-        )
-        self.app.add_url_rule(
-            self.api_prefix + '/jobs/<job_id>',
-            self.endpoint_prefix + 'delete_job',
-            self._apply_auth(api.delete_job),
-            methods=['DELETE']
-        )
-        self.app.add_url_rule(
-            self.api_prefix + '/jobs/<job_id>',
-            self.endpoint_prefix + 'update_job',
-            self._apply_auth(api.update_job),
-            methods=['PATCH']
-        )
-        self.app.add_url_rule(
-            self.api_prefix + '/jobs/<job_id>/pause',
-            self.endpoint_prefix + 'pause_job',
-            self._apply_auth(api.pause_job),
-            methods=['POST']
-        )
-        self.app.add_url_rule(
-            self.api_prefix + '/jobs/<job_id>/resume',
-            self.endpoint_prefix + 'resume_job',
-            self._apply_auth(api.resume_job),
-            methods=['POST']
-        )
-        self.app.add_url_rule(
-            self.api_prefix + '/jobs/<job_id>/run',
-            self.endpoint_prefix + 'run_job',
-            self._apply_auth(api.run_job),
-            methods=['POST']
+            rule,
+            endpoint,
+            self._apply_auth(view_func),
+            methods=[method]
         )
 
     def _apply_auth(self, view_func):
