@@ -1,7 +1,11 @@
 # Changelog
 
+### Version 1.10.0
+ - Add SCHEDULER_ENDPOINT_PREFIX setting to control the endpoint name. Thanks [andreicalistru](https://github.com/andreicalistru).
+ - Set SCHEDULER_API_PREFIX default value to '/scheduler'. Thanks [andreicalistru](https://github.com/andreicalistru).
+
 ### Version 1.9.0
- - Add support for URL prefix. Thanks [FrEaKmAn](https://github.com/FrEaKmAn).
+ - Add SCHEDULER_API_PREFIX to control the endpoint url. Thanks [FrEaKmAn](https://github.com/FrEaKmAn).
  - Fix issue #75
 
 ### Version 1.8.0
