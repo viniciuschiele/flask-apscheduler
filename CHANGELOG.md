@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.10.1
+ - Add LICENSE file to the package.
+
 ### Version 1.10.0
  - Add SCHEDULER_ENDPOINT_PREFIX setting to control the endpoint name. Thanks [andreicalistru](https://github.com/andreicalistru).
  - Set SCHEDULER_API_PREFIX default value to '/scheduler'. Thanks [andreicalistru](https://github.com/andreicalistru).
