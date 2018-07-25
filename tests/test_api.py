@@ -17,7 +17,7 @@ class TestAPI(TestCase):
         self.client = self.app.test_client()
 
     def test_scheduler_info(self):
-        response = self.client.get('/scheduler')
+        response = self.client.get(self.scheduler.api_prefix)
         self.assertEqual(response.status_code, 200)
         info = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(info['current_host'])
@@ -32,7 +32,7 @@ class TestAPI(TestCase):
             'run_date': '2020-12-01T12:30:01+00:00',
         }
 
-        response = self.client.post('/scheduler/jobs', data=json.dumps(job))
+        response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
         self.assertEqual(response.status_code, 200)
 
         job2 = json.loads(response.get_data(as_text=True))
@@ -50,10 +50,10 @@ class TestAPI(TestCase):
             'run_date': '2020-12-01T12:30:01+00:00',
         }
 
-        response = self.client.post('/scheduler/jobs', data=json.dumps(job))
+        response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post('/scheduler/jobs', data=json.dumps(job))
+        response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
         self.assertEqual(response.status_code, 409)
 
     def test_add_invalid_job(self):
@@ -61,26 +61,26 @@ class TestAPI(TestCase):
             'id': None,
         }
 
-        response = self.client.post('/scheduler/jobs', data=json.dumps(job))
+        response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
         self.assertEqual(response.status_code, 500)
 
     def test_delete_job(self):
         self.__add_job()
 
-        response = self.client.delete('/scheduler/jobs/job1')
+        response = self.client.delete(self.scheduler.api_prefix + '/jobs/job1')
         self.assertEqual(response.status_code, 204)
 
-        response = self.client.get('/scheduler/jobs/job1')
+        response = self.client.get(self.scheduler.api_prefix + '/jobs/job1')
         self.assertEqual(response.status_code, 404)
 
     def test_delete_job_not_found(self):
-        response = self.client.delete('/scheduler/jobs/job1')
+        response = self.client.delete(self.scheduler.api_prefix + '/jobs/job1')
         self.assertEqual(response.status_code, 404)
 
     def test_get_job(self):
         job = self.__add_job()
 
-        response = self.client.get('/scheduler/jobs/job1')
+        response = self.client.get(self.scheduler.api_prefix + '/jobs/job1')
         self.assertEqual(response.status_code, 200)
 
         job2 = json.loads(response.get_data(as_text=True))
@@ -91,13 +91,13 @@ class TestAPI(TestCase):
         self.assertEqual(job.get('minutes'), job2.get('minutes'))
 
     def test_get_job_not_found(self):
-        response = self.client.get('/scheduler/jobs/job1')
+        response = self.client.get(self.scheduler.api_prefix + '/jobs/job1')
         self.assertEqual(response.status_code, 404)
 
     def test_get_all_jobs(self):
         job = self.__add_job()
 
-        response = self.client.get('/scheduler/jobs')
+        response = self.client.get(self.scheduler.api_prefix + '/jobs')
         self.assertEqual(response.status_code, 200)
 
         jobs = json.loads(response.get_data(as_text=True))
@@ -121,7 +121,7 @@ class TestAPI(TestCase):
             'start_date': '2021-01-01'
         }
 
-        response = self.client.patch('/scheduler/jobs/job1', data=json.dumps(data_to_update))
+        response = self.client.patch(self.scheduler.api_prefix + '/jobs/job1', data=json.dumps(data_to_update))
         self.assertEqual(response.status_code, 200)
 
         job2 = json.loads(response.get_data(as_text=True))
@@ -141,7 +141,7 @@ class TestAPI(TestCase):
             'start_date': '2021-01-01'
         }
 
-        response = self.client.patch('/scheduler/jobs/job1', data=json.dumps(data_to_update))
+        response = self.client.patch(self.scheduler.api_prefix + '/jobs/job1', data=json.dumps(data_to_update))
         self.assertEqual(response.status_code, 404)
 
     def test_update_invalid_job(self):
@@ -151,39 +151,39 @@ class TestAPI(TestCase):
             'trigger': 'invalid_trigger',
         }
 
-        response = self.client.patch('/scheduler/jobs/job1', data=json.dumps(data_to_update))
+        response = self.client.patch(self.scheduler.api_prefix + '/jobs/job1', data=json.dumps(data_to_update))
         self.assertEqual(response.status_code, 500)
 
     def test_pause_and_resume_job(self):
         self.__add_job()
 
-        response = self.client.post('/scheduler/jobs/job1/pause')
+        response = self.client.post(self.scheduler.api_prefix + '/jobs/job1/pause')
         self.assertEqual(response.status_code, 200)
         job = json.loads(response.get_data(as_text=True))
         self.assertIsNone(job.get('next_run_time'))
 
-        response = self.client.post('/scheduler/jobs/job1/resume')
+        response = self.client.post(self.scheduler.api_prefix + '/jobs/job1/resume')
         self.assertEqual(response.status_code, 200)
         job = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(job.get('next_run_time'))
 
     def test_pause_and_resume_job_not_found(self):
-        response = self.client.post('/scheduler/jobs/job1/pause')
+        response = self.client.post(self.scheduler.api_prefix + '/jobs/job1/pause')
         self.assertEqual(response.status_code, 404)
 
-        response = self.client.post('/scheduler/jobs/job1/resume')
+        response = self.client.post(self.scheduler.api_prefix + '/jobs/job1/resume')
         self.assertEqual(response.status_code, 404)
 
     def test_run_job(self):
         self.__add_job()
 
-        response = self.client.post('/scheduler/jobs/job1/run')
+        response = self.client.post(self.scheduler.api_prefix + '/jobs/job1/run')
         self.assertEqual(response.status_code, 200)
         job = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(job.get('next_run_time'))
 
     def test_run_job_not_found(self):
-        response = self.client.post('/scheduler/jobs/job1/run')
+        response = self.client.post(self.scheduler.api_prefix + '/jobs/job1/run')
         self.assertEqual(response.status_code, 404)
 
     def __add_job(self):
@@ -194,7 +194,7 @@ class TestAPI(TestCase):
             'minutes': 10,
         }
 
-        response = self.client.post('/scheduler/jobs', data=json.dumps(job))
+        response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
         return json.loads(response.get_data(as_text=True))
 
 
@@ -209,11 +209,11 @@ class TestAPIPrefix(TestCase):
         self.client = self.app.test_client()
 
     def test_api_prefix(self):
-        response = self.client.get('/api/scheduler/jobs')
+        response = self.client.get(self.scheduler.api_prefix + '/jobs')
         self.assertEqual(response.status_code, 200)
 
     def test_invalid_api_prefix(self):
-        response = self.client.get('/invalidapi/scheduler/jobs')
+        response = self.client.get('/invalidapi/jobs')
         self.assertEqual(response.status_code, 404)
 
 
@@ -233,23 +233,23 @@ class TestHTTPBasicAuth(TestCase):
 
     def test_valid_credentials(self):
         headers = {'Authorization': 'Basic ' + base64.b64encode(b'test:test').decode('ascii')}
-        response = self.client.get('/scheduler', headers=headers)
+        response = self.client.get(self.scheduler.api_prefix + '', headers=headers)
         self.assertEqual(response.status_code, 200)
 
     def test_invalid_credentials(self):
         headers = {'Authorization': 'Basic ' + base64.b64encode(b'guest:guest').decode('ascii')}
-        response = self.client.get('/scheduler', headers=headers)
+        response = self.client.get(self.scheduler.api_prefix + '', headers=headers)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.headers['WWW-Authenticate'], 'Basic realm="Authentication Required"')
 
     def test_invalid_header_format(self):
         headers = {'Authorization': 'Basic 1231234'}
-        response = self.client.get('/scheduler', headers=headers)
+        response = self.client.get(self.scheduler.api_prefix + '', headers=headers)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.headers['WWW-Authenticate'], 'Basic realm="Authentication Required"')
 
     def test_missing_credentials(self):
-        response = self.client.get('/scheduler')
+        response = self.client.get(self.scheduler.api_prefix + '')
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.headers['WWW-Authenticate'], 'Basic realm="Authentication Required"')
 
