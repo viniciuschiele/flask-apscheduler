@@ -325,15 +325,15 @@ class APScheduler(object):
         """
         Add the routes for the scheduler API.
         """
-        self._add_url_route('get_scheduler_info', '', api.get_scheduler_info, 'GET')
-        self._add_url_route('add_job', '/jobs', api.add_job, 'POST')
-        self._add_url_route('get_job', '/jobs/<job_id>', api.get_job, 'GET')
-        self._add_url_route('get_jobs', '/jobs', api.get_jobs, 'GET')
-        self._add_url_route('delete_job', '/jobs/<job_id>', api.delete_job, 'DELETE')
-        self._add_url_route('update_job', '/jobs/<job_id>', api.update_job, 'PATCH')
-        self._add_url_route('pause_job', '/jobs/<job_id>/pause', api.pause_job, 'POST')
-        self._add_url_route('resume_job', '/jobs/<job_id>/resume', api.resume_job, 'POST')
-        self._add_url_route('run_job', '/jobs/<job_id>/run', api.run_job, 'POST')
+        self._add_url_route('get_scheduler_info', '/', api.get_scheduler_info, 'GET')
+        self._add_url_route('add_job', '/jobs/', api.add_job, 'POST')
+        self._add_url_route('get_job', '/jobs/<job_id>/', api.get_job, 'GET')
+        self._add_url_route('get_jobs', '/jobs/', api.get_jobs, 'GET')
+        self._add_url_route('delete_job', '/jobs/<job_id>/', api.delete_job, 'DELETE')
+        self._add_url_route('update_job', '/jobs/<job_id>/', api.update_job, 'PATCH')
+        self._add_url_route('pause_job', '/jobs/<job_id>/pause/', api.pause_job, 'POST')
+        self._add_url_route('resume_job', '/jobs/<job_id>/resume/', api.resume_job, 'POST')
+        self._add_url_route('run_job', '/jobs/<job_id>/run/', api.run_job, 'POST')
 
     def _add_url_route(self, endpoint, rule, view_func, method):
         """
