@@ -21,6 +21,7 @@ import warnings
 
 from apscheduler.events import EVENT_ALL
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.base import JobLookupError
 from flask import make_response
 from . import api
 from .utils import fix_job_def, pop_trigger
@@ -265,7 +266,7 @@ class APScheduler(object):
         job = self._scheduler.get_job(id, jobstore)
 
         if not job:
-            raise LookupError(id)
+            raise JobLookupError(id)
 
         job.func(*job.args, **job.kwargs)
 
