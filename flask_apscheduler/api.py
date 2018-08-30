@@ -130,7 +130,7 @@ def run_job(job_id):
         current_app.apscheduler.run_job(job_id)
         job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
-    except LookupError:
+    except JobLookupError:
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
     except Exception as e:
         return jsonify(dict(error_message=str(e)), status=500)
