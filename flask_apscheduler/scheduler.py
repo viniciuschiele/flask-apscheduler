@@ -66,6 +66,11 @@ class APScheduler(object):
     def scheduler(self):
         """Get the base scheduler."""
         return self._scheduler
+    
+    @property
+    def task(self):
+        """Get the base scheduler decorator"""
+        return self._scheduler.scheduled_job
 
     def init_app(self, app):
         """Initialize the APScheduler with a Flask application instance."""
