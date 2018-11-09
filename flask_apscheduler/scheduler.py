@@ -66,7 +66,7 @@ class APScheduler(object):
     def scheduler(self):
         """Get the base scheduler."""
         return self._scheduler
-    
+
     @property
     def task(self):
         """Get the base scheduler decorator"""
