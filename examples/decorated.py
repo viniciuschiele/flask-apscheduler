@@ -22,7 +22,7 @@ def job2():
 
 
 @scheduler.task("cron", id="do_job_3", week="*", day_of_week="sun")
-def task_purge_processed():
+def job3():
     print("Job 3 executed")
 
 
