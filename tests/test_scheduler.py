@@ -46,6 +46,14 @@ class TestScheduler(TestCase):
         job = self.scheduler.get_job('job1')
         self.assertIsNotNone(job)
 
+    def test_task_decorator(self):
+        @self.scheduler.task('interval', seconds=10, id='job1')
+        def decorated_job():
+            pass
+
+        job = self.scheduler.get_job('job1')
+        self.assertIsNotNone(job)
+
 
 def job1():
     pass
