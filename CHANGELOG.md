@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.11.0
+ - Add task decorator. Thanks [jscurtu](https://github.com/jscurtu) for the PR.
+
 ### Version 1.10.1
  - Add LICENSE file to the package.
 
@@ -8,7 +11,7 @@
  - Set SCHEDULER_API_PREFIX default value to '/scheduler'. Thanks [andreicalistru](https://github.com/andreicalistru).
 
 ### Version 1.9.0
- - Add SCHEDULER_API_PREFIX to control the endpoint url. Thanks [FrEaKmAn](https://github.com/FrEaKmAn).
+ - Add SCHEDULER_API_PREFIX to control the endpoint url. Thanks [FrEaKmAn](https://github.com/FrEaKmAn) for the PR.
  - Fix issue #75
 
 ### Version 1.8.0
