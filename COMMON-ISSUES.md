@@ -65,7 +65,7 @@ def your_function():
 scheduler.add_job(<details here>)
 ```
 
-You could accomplish the same by importing modules that contain decorated functions:
+You could accomplish the same by importing modules that contain decorated functions (un-nested, at the module level):
 ```python
 # app/tasks.py
 
