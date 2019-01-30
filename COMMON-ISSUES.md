@@ -2,7 +2,7 @@
 
 <h3>Context Issues</h3>
 
-On each function registered to the scheduler that requires Flask app contect, assuming your `APScheduler` object is called `scheduler`, include:
+On each function registered to the scheduler that requires Flask app context, assuming your `APScheduler` object is called `scheduler`, include:
 
 ```python
 with scheduler.app.app_context():
@@ -65,7 +65,7 @@ def your_function():
 scheduler.add_job(<details here>)
 ```
 
-You could accomplish the same with importing modules with decorators:
+You could accomplish the same by importing modules that contain decorated functions:
 ```python
 # app/tasks.py
 
