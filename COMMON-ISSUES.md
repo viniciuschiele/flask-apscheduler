@@ -73,7 +73,6 @@ You could accomplish the same by importing modules that contain decorated functi
 def scheduled_function():
     # your scheduled task code here
 ```
-```
 ```python
 # other_module.py
 
