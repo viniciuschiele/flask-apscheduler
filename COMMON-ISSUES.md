@@ -59,6 +59,7 @@ So this function could be added using the `add_job` method:
 def your_function():
     # your scheduled task code here
 ```
+
 ```python
 # other_module.py
 
