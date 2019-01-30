@@ -17,6 +17,8 @@ Documentation
 ===============
 Take a look at the examples_ to see how it works.
 
+Also take a look at COMMON-ISSUES.md for help.
+
 Installation
 ===============
 You can install Flask-APScheduler via Python Package Index (PyPI_),::
