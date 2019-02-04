@@ -17,7 +17,7 @@ Documentation
 ===============
 Take a look at the examples_ to see how it works.
 
-Also take a look at COMMON-ISSUES.md for help.
+Also take a look at `COMMON-ISSUES.md <https://github.com/viniciuschiele/flask-apscheduler/blob/master/COMMON-ISSUES.md>`_ for help.
 
 Installation
 ===============
@@ -46,4 +46,6 @@ Please use the Issues_ for feature requests and troubleshooting usage.
 .. _PyPi: https://pypi.python.org/pypi/Flask-APScheduler
 
 .. _Issues: https://github.com/viniciuschiele/flask-apscheduler/issues
+
+.. _CommonIssues:
 
