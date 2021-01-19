@@ -29,7 +29,9 @@ Setup
 * Import and initialize ``Flask-APScheduler``
 * Set any configuration needed
 
-A basic example will looks like this:: python
+A basic example will looks like this.
+
+.. code-block:: python
 
     from flask import Flask
     # import Flask-APScheduler
