@@ -154,8 +154,9 @@ Configuration
 
 Configuration options specific to ``Flask-APScheduler``:
 
+.. code-block:: python
 
-`SCHEDULER_API_ENABLED`: True or False
+    SCHEDULER_API_ENABLED: <True or False>
 
 Other configuration options are included from `APScheduler <https://apscheduler.readthedocs.io/en/stable/userguide.html#configuring-the-scheduler>`_
 
@@ -163,7 +164,7 @@ Other configuration options are included from `APScheduler <https://apscheduler.
 Tips
 ----
 
-When running Flask-APScheduler on a wsgi process only *1* worker should be enabled. APScheduler 3.0 will only work with a single worker process. Jobstores cannot be shared among multiple schedulers.
+When running Flask-APScheduler on a wsgi process only **1** worker should be enabled. APScheduler 3.0 will only work with a single worker process. Jobstores cannot be shared among multiple schedulers.
 
 See `APScheduler's <https://apscheduler.readthedocs.io/en/stable/>`_ documentation for further help.
 
