@@ -95,7 +95,9 @@ Logging
 
 All scheduler events can be used to trigger logging functions. See `APScheduler <https://apscheduler.readthedocs.io/en/stable/userguide.html#scheduler-events>`_ for a list of available events.
 
-If you are using your Flask app context inside of a function triggered by a scheduler event can include something like this:: python
+If you are using your Flask app context inside of a function triggered by a scheduler event can include something like this
+
+.. code-block:: python
 
     def blah():
         with scheduler.app.app_context():
@@ -107,7 +109,9 @@ If you are using your Flask app context inside of a function triggered by a sche
 API
 ---
 
-Flask-APScheduler comes with a build-in API. This can be enabled/disabled in your flask configuration.:: python
+Flask-APScheduler comes with a build-in API. This can be enabled/disabled in your flask configuration.
+
+.. code-block:: python
 
     SCHEDULER_API_ENABLED: True
 
