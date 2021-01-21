@@ -80,11 +80,15 @@ Jobs can be added to the scheduler when the app starts. They are created in deco
         print('Job 3 executed')
 
 
-Jobs can also be added after you app is running:: python
+Jobs can also be added after you app is running
+
+.. code-block:: python
 
     scheduler.add_job(**args)
 
-If you wish to use anything from your Flask app context inside the job you can use something like this:: python
+If you wish to use anything from your Flask app context inside the job you can use something like this
+
+.. code-block:: python
 
     def blah():
         with scheduler.app.app_context():
@@ -116,15 +120,15 @@ Flask-APScheduler comes with a build-in API. This can be enabled/disabled in you
     SCHEDULER_API_ENABLED: True
 
 
-/scheduler [GET] > returns basic information about the webapp
-/scheduler/jobs [POST json job data] > adds a job to the scheduler
-/scheduler/jobs/<job_id> [GET] > returns json of job details
-/scheduler/jobs [GET] > returns json with details of all jobs
-/scheduler/jobs/<job_id> [DELETE] > deletes job from scheduler
-/scheduler/jobs/<job_id> [PATCH json job data] > updates an already existing job
-/scheduler/jobs/<job_id>/pause [POST] > pauses a job, returns json of job details
-/scheduler/jobs/<job_id>/resume [POST] > resumes a job, returns json of job details
-/scheduler/jobs/<job_id>/run [POST] > runs a job now, returns json of job details
+- /scheduler [GET] > returns basic information about the webapp
+- /scheduler/jobs [POST json job data] > adds a job to the scheduler
+- /scheduler/jobs/<job_id> [GET] > returns json of job details
+- /scheduler/jobs [GET] > returns json with details of all jobs
+- /scheduler/jobs/<job_id> [DELETE] > deletes job from scheduler
+- /scheduler/jobs/<job_id> [PATCH json job data] > updates an already existing job
+- /scheduler/jobs/<job_id>/pause [POST] > pauses a job, returns json of job details
+- /scheduler/jobs/<job_id>/resume [POST] > resumes a job, returns json of job details
+- /scheduler/jobs/<job_id>/run [POST] > runs a job now, returns json of job details
 
 
 Scheduler
@@ -132,21 +136,21 @@ Scheduler
 
 Other commands can be passed to the scheduler and are rather self explainatory:
 
-* scheduler.start()
-* scheduler.shutdown()
-* scheduler.pause() > stops any job from starting. Already running jobs not affected.
-* scheduler.resume() > allows scheduled jobs to begin running.
-* scheduler.add_listener(<callback function>,<event>)
-* scheduler.remove_listener(<callback function>)
-* scheduler.add_job(<id>,<function>, **kwargs)
-* scheduler.remove_job(<id>, **<jobstore>)
-* scheduler.remove_all_jobs(**<jobstore>)
-* scheduler.get_job(**<jobstore>)
-* scheduler.modify_job(<id>,**<jobstore>, **kwargs)
-* scheduler.pause_job(<id>, **<jobstore>)
-* scheduler.resume_job(<id>, **<jobstore>)
-* scheduler.run_job(<id>, **<jobstore>)
-* scheduler.authenticate(<function>)
+- scheduler.start()
+- scheduler.shutdown()
+- scheduler.pause() > stops any job from starting. Already running jobs not affected.
+- scheduler.resume() > allows scheduled jobs to begin running.
+- scheduler.add_listener(<callback function>,<event>)
+- scheduler.remove_listener(<callback function>)
+- scheduler.add_job(<id>,<function>, **kwargs)
+- scheduler.remove_job(<id>, **<jobstore>)
+- scheduler.remove_all_jobs(**<jobstore>)
+- scheduler.get_job(**<jobstore>)
+- scheduler.modify_job(<id>,**<jobstore>, **kwargs)
+- scheduler.pause_job(<id>, **<jobstore>)
+- scheduler.resume_job(<id>, **<jobstore>)
+- scheduler.run_job(<id>, **<jobstore>)
+- scheduler.authenticate(<function>)
 
 
 Configuration
