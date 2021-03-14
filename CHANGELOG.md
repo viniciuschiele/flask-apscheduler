@@ -1,5 +1,9 @@
 # Changelog
 
+### Version 1.12.0
+ - Pin APScheduler v3 to avoid unexpected errors as v4 may have significant changes. Thanks [christopherpickering](https://github.com/christopherpickering) for the PR.
+ - Fix issue [#139](https://github.com/viniciuschiele/flask-apscheduler/issues/139)
+
 ### Version 1.11.0
  - Add task decorator. Thanks [jscurtu](https://github.com/jscurtu) for the PR.
 
@@ -12,7 +16,7 @@
 
 ### Version 1.9.0
  - Add SCHEDULER_API_PREFIX to control the endpoint url. Thanks [FrEaKmAn](https://github.com/FrEaKmAn) for the PR.
- - Fix issue #75
+ - Fix issue [#75](https://github.com/viniciuschiele/flask-apscheduler/issues/75)
 
 ### Version 1.8.0
  - Add property to get the state of the scheduler.
