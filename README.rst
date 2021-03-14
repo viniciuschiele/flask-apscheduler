@@ -145,7 +145,7 @@ Other commands can be passed to the scheduler and are rather self explainatory:
 - scheduler.add_job(<id>,<function>, **kwargs)
 - scheduler.remove_job(<id>, **<jobstore>)
 - scheduler.remove_all_jobs(**<jobstore>)
-- scheduler.get_job(**<jobstore>)
+- scheduler.get_job(<id>,**<jobstore>)
 - scheduler.modify_job(<id>,**<jobstore>, **kwargs)
 - scheduler.pause_job(<id>, **<jobstore>)
 - scheduler.resume_job(<id>, **<jobstore>)
