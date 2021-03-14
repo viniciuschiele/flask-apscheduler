@@ -30,7 +30,7 @@ class TestAPI(TestCase):
             'id': 'job1',
             'func': 'tests.test_api:job1',
             'trigger': 'date',
-            'run_date': '2020-12-01T12:30:01+00:00',
+            'run_date': '2025-12-01T12:30:01+00:00',
         }
 
         response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
@@ -48,7 +48,7 @@ class TestAPI(TestCase):
             'id': 'job1',
             'func': 'tests.test_api:job1',
             'trigger': 'date',
-            'run_date': '2020-12-01T12:30:01+00:00',
+            'run_date': '2025-12-01T12:30:01+00:00',
         }
 
         response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
@@ -119,7 +119,7 @@ class TestAPI(TestCase):
             'args': [1],
             'trigger': 'cron',
             'minute': '*/1',
-            'start_date': '2021-01-01'
+            'start_date': '2025-01-01'
         }
 
         response = self.client.patch(self.scheduler.api_prefix + '/jobs/job1', data=json.dumps(data_to_update))
@@ -131,15 +131,15 @@ class TestAPI(TestCase):
         self.assertEqual(job.get('func'), job2.get('func'))
         self.assertEqual(data_to_update.get('args'), job2.get('args'))
         self.assertEqual(data_to_update.get('trigger'), job2.get('trigger'))
-        self.assertEqual('2021-01-01T00:00:00+00:00', job2.get('start_date'))
-        self.assertEqual('2021-01-01T00:00:00+00:00', job2.get('next_run_time'))
+        self.assertEqual('2025-01-01T00:00:00+00:00', job2.get('start_date'))
+        self.assertEqual('2025-01-01T00:00:00+00:00', job2.get('next_run_time'))
 
     def test_update_job_not_found(self):
         data_to_update = {
             'args': [1],
             'trigger': 'cron',
             'minute': '*/1',
-            'start_date': '2021-01-01'
+            'start_date': '2025-01-01'
         }
 
         response = self.client.patch(self.scheduler.api_prefix + '/jobs/job1', data=json.dumps(data_to_update))
