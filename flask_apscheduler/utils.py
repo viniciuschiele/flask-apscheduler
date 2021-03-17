@@ -150,5 +150,5 @@ def extract_timedelta(delta):
     return w, d, hh, mm, ss
 
 
-def is_werkzeug_reloader_process():
-    return os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
+def is_not_werkzeug_reloader_process():
+    return not os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
