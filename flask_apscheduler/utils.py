@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Utility module."""
+import os
 
 import dateutil.parser
 import six
@@ -147,3 +148,7 @@ def extract_timedelta(delta):
     mm, ss = divmod(delta.seconds, 60)
     hh, mm = divmod(mm, 60)
     return w, d, hh, mm, ss
+
+
+def is_werkzeug_reloader_process():
+    return  os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
