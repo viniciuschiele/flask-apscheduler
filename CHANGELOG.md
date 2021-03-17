@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.12.1
+ - Revert PR [#140]()https://github.com/viniciuschiele/flask-apscheduler/pull/140)
+
 ### Version 1.12.0
  - Pin APScheduler v3 to avoid unexpected errors as v4 may have significant changes. Thanks [christopherpickering](https://github.com/christopherpickering) for the PR.
  - Fix issue [#139](https://github.com/viniciuschiele/flask-apscheduler/issues/139)
