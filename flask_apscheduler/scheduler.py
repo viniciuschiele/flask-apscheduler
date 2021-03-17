@@ -26,6 +26,7 @@ from flask import make_response
 from . import api
 from .utils import fix_job_def, is_not_werkzeug_reloader_process, pop_trigger
 
+
 LOGGER = logging.getLogger('flask_apscheduler')
 
 
@@ -89,6 +90,7 @@ class APScheduler(object):
         Start the scheduler.
         :param bool paused: if True, don't start job processing until resume is called.
         """
+
         # Flask in debug mode spawns a child process so that it can restart that process each time your code changes,
         # the new child process initializes and starts a new APScheduler causing the jobs to run twice.
         if is_not_werkzeug_reloader_process():

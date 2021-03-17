@@ -15,7 +15,6 @@
 """Utility module."""
 
 import dateutil.parser
-import os
 import six
 
 from apscheduler.triggers.cron import CronTrigger
