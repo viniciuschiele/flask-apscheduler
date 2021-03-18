@@ -152,3 +152,11 @@ def extract_timedelta(delta):
 
 def is_werkzeug_reloader_process():
     return  os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
+
+
+def is_debug_mode():
+    val = os.environ.get("FLASK_DEBUG")
+    if not val:
+        return os.environ.get('FLASK_ENV') == "development"
+
+    return val.lower() not in ("0", "false", "no")
