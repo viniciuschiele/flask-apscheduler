@@ -12,7 +12,7 @@ jobs:
     container: python3
     steps:
       - name: get code
-      - uses: actions/checkout@v1
+        uses: actions/checkout@v1
 
       - name: build docs
         run: |
