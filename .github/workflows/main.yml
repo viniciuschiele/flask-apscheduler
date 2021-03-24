@@ -9,7 +9,7 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-latest
-    container: python3
+    container: python:3
     steps:
       - name: get code
         uses: actions/checkout@v1
