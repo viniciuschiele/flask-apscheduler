@@ -6,6 +6,7 @@ from flask import Flask, url_for
 from flask_apscheduler import APScheduler
 from flask_apscheduler.auth import HTTPBasicAuth
 from unittest import TestCase
+from pytz import utc
 
 
 class TestAPI(TestCase):
@@ -30,7 +31,7 @@ class TestAPI(TestCase):
             'id': 'job1',
             'func': 'tests.test_api:job1',
             'trigger': 'date',
-            'run_date': '2025-12-01T12:30:01+00:00',
+            'run_date': '2025-12-01T12:30:01-06:00',
         }
 
         response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
@@ -48,7 +49,7 @@ class TestAPI(TestCase):
             'id': 'job1',
             'func': 'tests.test_api:job1',
             'trigger': 'date',
-            'run_date': '2025-12-01T12:30:01+00:00',
+            'run_date': '2025-12-01T12:30:01-06:00',
         }
 
         response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
@@ -131,8 +132,8 @@ class TestAPI(TestCase):
         self.assertEqual(job.get('func'), job2.get('func'))
         self.assertEqual(data_to_update.get('args'), job2.get('args'))
         self.assertEqual(data_to_update.get('trigger'), job2.get('trigger'))
-        self.assertEqual('2025-01-01T00:00:00+00:00', job2.get('start_date'))
-        self.assertEqual('2025-01-01T00:00:00+00:00', job2.get('next_run_time'))
+        self.assertEqual('2025-01-01T00:00:00-06:00', job2.get('start_date'))
+        self.assertEqual('2025-01-01T00:00:00-06:00', job2.get('next_run_time'))
 
     def test_update_job_not_found(self):
         data_to_update = {

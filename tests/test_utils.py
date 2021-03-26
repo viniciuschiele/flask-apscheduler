@@ -2,7 +2,6 @@ from copy import deepcopy
 from flask_apscheduler import utils
 from unittest import TestCase
 
-
 class TestUtils(TestCase):
     def test_pop_trigger(self):
         def __pop_trigger(trigger, *params):
