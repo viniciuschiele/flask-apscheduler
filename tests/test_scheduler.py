@@ -1,12 +1,15 @@
 from flask import Flask
-from flask_apscheduler import APScheduler
+from flask_apscheduler import APScheduler, utils
 from unittest import TestCase
-
+import apscheduler
+from pytz import utc
+import datetime
 
 class TestScheduler(TestCase):
     def setUp(self):
         self.app = Flask(__name__)
         self.scheduler = APScheduler()
+        self.scheduler_two = APScheduler(app=self.app)
 
     def test_running(self):
         self.assertFalse(self.scheduler.running)
@@ -38,11 +41,15 @@ class TestScheduler(TestCase):
                 'id': 'job1',
                 'func': 'tests.test_api:job1',
                 'trigger': 'interval',
-                'seconds': 10
+                'seconds': 10,
             }
         ]
+        self.app.config['SCHEDULER_JOBSTORES'] = {"default": apscheduler.jobstores.memory.MemoryJobStore()}
+        self.app.config['SCHEDULER_EXECUTORS'] = {"default": {"type": "threadpool"}}
+        self.app.config['SCHEDULER_JOB_DEFAULTS'] = {"coalesce": True}
+        self.app.config['SCHEDULER_TIMEZONE'] = utc
 
-        self.scheduler.init_app(self.app)
+        self.scheduler.init_app(app=self.app)
         job = self.scheduler.get_job('job1')
         self.assertIsNotNone(job)
 
@@ -53,6 +60,129 @@ class TestScheduler(TestCase):
 
         job = self.scheduler.get_job('job1')
         self.assertIsNotNone(job)
+
+
+    def test_state_prop(self):
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        self.assertTrue(self.scheduler.state)
+        self.scheduler.shutdown()
+        self.assertFalse(self.scheduler.state)
+
+    def test_scheduler_prop(self):
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        self.assertIsNotNone(self.scheduler.scheduler)
+        self.scheduler.shutdown()
+        self.assertFalse(self.scheduler.running)
+
+    def test_pause_resume(self):
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        self.assertTrue(self.scheduler.running)
+        self.scheduler.pause()
+        self.assertTrue(self.scheduler.state == 2)
+        self.scheduler.resume()
+        self.assertTrue(self.scheduler.state == 1)
+        self.scheduler.shutdown()
+        self.assertFalse(self.scheduler.running)
+
+    def test_add_listener(self):
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        self.assertTrue(self.scheduler.running)
+        self.scheduler.add_listener(None)
+        self.scheduler.remove_listener(None)
+        self.scheduler.shutdown()
+        self.assertFalse(self.scheduler.running)
+
+    def test_add_remove_job(self):
+        @self.scheduler.task('interval', seconds=10, id='job1')
+        def decorated_job():
+            pass
+
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        job = self.scheduler.get_job('job1')
+        self.assertIsNotNone(job)
+
+        self.scheduler.remove_job('job1')
+        self.assertFalse(self.scheduler.get_job('job1'))
+        self.scheduler.shutdown()
+        self.assertFalse(self.scheduler.running)
+
+    def test_add_delete_job(self):
+        @self.scheduler.task('interval', seconds=10, id='job1')
+        def decorated_job():
+            pass
+
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        job = self.scheduler.get_job('job1')
+        self.assertIsNotNone(job)
+
+        self.scheduler.delete_job('job1')
+        self.assertFalse(self.scheduler.get_job('job1'))
+        self.scheduler.shutdown()
+        self.assertFalse(self.scheduler.running)
+
+
+    def test_add_remove_all_jobs(self):
+        @self.scheduler.task('interval', hours=1, id='job1')
+        def decorated_job():
+            pass
+
+        @self.scheduler.task('interval', hours=1, id='job2')
+        def decorated_job2():
+            pass
+
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        jobs = self.scheduler.get_jobs()
+        self.assertTrue(len(jobs) == 2)
+        self.scheduler.remove_all_jobs()
+
+        self.assertFalse(self.scheduler.get_job('job1'))
+        self.assertFalse(self.scheduler.get_job('job2'))
+
+        self.scheduler.shutdown()
+        self.assertFalse(self.scheduler.running)
+
+    def test_add_delete_all_jobs(self):
+        @self.scheduler.task('interval', hours=1, id='job1')
+        def decorated_job():
+            pass
+
+        @self.scheduler.task('interval', hours=1, id='job2')
+        def decorated_job2():
+            pass
+
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        jobs = self.scheduler.get_jobs()
+        self.assertTrue(len(jobs) == 2)
+        self.scheduler.delete_all_jobs()
+
+        self.assertFalse(self.scheduler.get_job('job1'))
+        self.assertFalse(self.scheduler.get_job('job2'))
+
+        self.scheduler.shutdown()
+        self.assertFalse(self.scheduler.running)
+
+    def test_job_to_dict(self):
+        @self.scheduler.task('interval', hours=1, id='job1', end_date=datetime.datetime.now(), weeks=1, days=1, seconds=99)
+        def decorated_job():
+            pass
+        self.scheduler.init_app(self.app)
+        self.scheduler.start()
+        job = self.scheduler.get_job('job1')
+        self.assertIsNotNone(job)
+
+        self.assertTrue(len(utils.job_to_dict(job)))
+        self.scheduler.delete_job('job1')
+        self.assertFalse(self.scheduler.get_job('job1'))
+        self.scheduler.shutdown()
+        self.assertFalse(self.scheduler.running)
 
 
 def job1():

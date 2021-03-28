@@ -6,6 +6,7 @@ from flask import Flask, url_for
 from flask_apscheduler import APScheduler
 from flask_apscheduler.auth import HTTPBasicAuth
 from unittest import TestCase
+from pytz import utc
 
 
 class TestAPI(TestCase):
