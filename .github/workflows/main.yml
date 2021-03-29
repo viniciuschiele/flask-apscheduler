@@ -16,9 +16,8 @@ jobs:
 
       - name: build docs
         run: |
-          pip install sphinx Pygments furo sphinx-copybutton sphinx-inline-tabs myst-parser colorama sphinx-panels
-          cd docs
-          sphinx-build -E -b html . _build
+          pip install tox
+          tox -e docs
 
       # Runs a set of commands using the runners shell
       - name: publish
