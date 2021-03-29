@@ -15,7 +15,9 @@ Features
 
 Installation
 ===============
-You can install Flask-APScheduler via Python Package Index (PyPI_),::
+You can install Flask-APScheduler via Python Package Index (PyPI_)
+
+.. code:: python
 
     pip install Flask-APScheduler
 
