@@ -1,0 +1,6 @@
+reformat
+flake8
+flake8-bandit
+pygments
+black
+pylint
