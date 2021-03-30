@@ -19,12 +19,14 @@ import logging
 import socket
 import warnings
 
+import flask
+import werkzeug
 from apscheduler.events import EVENT_ALL
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
 from flask import make_response
 from . import api
-from .utils import fix_job_def, pop_trigger, is_werkzeug_reloader_process, is_debug_mode
+from .utils import fix_job_def, pop_trigger
 
 LOGGER = logging.getLogger('flask_apscheduler')
 
@@ -90,7 +92,9 @@ class APScheduler(object):
         :param bool paused: if True, don't start job processing until resume is called.
         """
 
-        if is_debug_mode() and not is_werkzeug_reloader_process():
+        # Flask in debug mode spawns a child process so that it can restart the process each time your code changes,
+        # the new child process initializes and starts a new APScheduler causing the jobs to run twice.
+        if flask.helpers.get_debug_flag() and not werkzeug.serving.is_running_from_reloader():
             return
 
         if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:
