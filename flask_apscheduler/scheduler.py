@@ -19,6 +19,8 @@ import logging
 import socket
 import warnings
 
+import flask
+import werkzeug
 from apscheduler.events import EVENT_ALL
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
@@ -89,6 +91,12 @@ class APScheduler(object):
         Start the scheduler.
         :param bool paused: if True, don't start job processing until resume is called.
         """
+
+        # Flask in debug mode spawns a child process so that it can restart the process each time your code changes,
+        # the new child process initializes and starts a new APScheduler causing the jobs to run twice.
+        if flask.helpers.get_debug_flag() and not werkzeug.serving.is_running_from_reloader():
+            return
+
         if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:
             LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
                          (self.host_name, ','.join(self.allowed_hosts)))
