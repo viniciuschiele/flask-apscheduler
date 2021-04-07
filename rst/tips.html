@@ -2,7 +2,8 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Examples" href="examples.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Examples" href="examples.html" />
 
     <meta name="generator" content="sphinx-3.5.3, furo 2021.03.20.beta30"/>
         <title>Tips - Flask APScheduler</title>
@@ -39,8 +40,8 @@
   }
 </style><link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" href="../_static/styles/furo-extensions.css?digest=d391b54134226e4196576da3bdb6dddb7e05ba2b"></head>
   <body dir="">
@@ -135,16 +136,16 @@
         <label class="toc-overlay-icon toc-content-icon" for="__toc">
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
-        <div class="section" id="tips">
+        <section id="tips">
 <h1>Tips<a class="headerlink" href="#tips" title="Permalink to this headline">¶</a></h1>
 <p>When running Flask-APScheduler on a wsgi process only <strong>1</strong> worker should be enabled. APScheduler 3.0 will only work with a single worker process. Jobstores cannot be shared among multiple schedulers.</p>
 <p>See <a class="reference external" href="https://apscheduler.readthedocs.io/en/stable/">APScheduler’s</a> documentation for further help.</p>
 <p>Take a look at the <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> to see how it works.</p>
-<div class="section" id="mixing-persistent-jobstores-with-tasks-from-config">
+<section id="mixing-persistent-jobstores-with-tasks-from-config">
 <h2>Mixing Persistent Jobstores with Tasks from Config<a class="headerlink" href="#mixing-persistent-jobstores-with-tasks-from-config" title="Permalink to this headline">¶</a></h2>
 <p>When using a persistent jobstore, do not register jobs from a configuration file. They should be registered by decorators (<a class="reference external" href="https://github.com/viniciuschiele/flask-apscheduler/blob/master/examples/decorated.py">see example</a>), or by using the <cite>add_job</cite> method.</p>
-</div>
-<div class="section" id="mixing-persistent-jobstores-with-tasks-in-init-py">
+</section>
+<section id="mixing-persistent-jobstores-with-tasks-in-init-py">
 <h2>Mixing Persistent Jobstores with Tasks in __init__.py<a class="headerlink" href="#mixing-persistent-jobstores-with-tasks-in-init-py" title="Permalink to this headline">¶</a></h2>
 <p>Tasks registered via decorator or the <cite>add_job</cite> method should not be loaded in your <cite>app/__init__.py</cite> if you are using a persistent job store. If they must be loaded upon app creation, a workaround would be as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/__init__.py</span>
@@ -176,8 +177,8 @@
 </pre></div>
 </div>
 <p>Your task will then be registered the first time that someone makes any request to the Flask app.</p>
-</div>
-<div class="section" id="trying-to-load-tasks-outside-module-level-import">
+</section>
+<section id="trying-to-load-tasks-outside-module-level-import">
 <h2>Trying to Load Tasks Outside Module-Level Import<a class="headerlink" href="#trying-to-load-tasks-outside-module-level-import" title="Permalink to this headline">¶</a></h2>
 <p>If your task was loading correctly with the default memory jobstore, but does not load correctly from a persistent jobstore, this is because functions to be loaded as jobs must be available as module-level imports when used with persistent jobstores. They cannot be nested within other functions or classes.</p>
 <p>So this function could be added using the <cite>add_job</cite> method:</p>
@@ -215,8 +216,8 @@
     <span class="c1"># your scheduled task code here</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
       </article>
       <footer>

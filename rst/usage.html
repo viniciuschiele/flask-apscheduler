@@ -2,7 +2,8 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Logging" href="logging.html" /><link rel="prev" title="Configuration" href="configuration.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Logging" href="logging.html" /><link rel="prev" title="Configuration" href="configuration.html" />
 
     <meta name="generator" content="sphinx-3.5.3, furo 2021.03.20.beta30"/>
         <title>Basic Application - Flask APScheduler</title>
@@ -39,8 +40,8 @@
   }
 </style><link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" href="../_static/styles/furo-extensions.css?digest=d391b54134226e4196576da3bdb6dddb7e05ba2b"></head>
   <body dir="">
@@ -135,9 +136,9 @@
         <label class="toc-overlay-icon toc-content-icon" for="__toc">
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
-        <div class="section" id="basic-application">
+        <section id="basic-application">
 <h1>Basic Application<a class="headerlink" href="#basic-application" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="setup">
+<section id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Create a flask application. For an example, see <a class="reference external" href="https://pythonspot.com/flask-web-app-with-python/">this tutorial</a></p></li>
@@ -168,8 +169,8 @@
     <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="adding-jobs">
+</section>
+<section id="adding-jobs">
 <h2>Adding Jobs<a class="headerlink" href="#adding-jobs" title="Permalink to this headline">¶</a></h2>
 <p>Jobs can be added to the scheduler when the app starts. They are created in decorated functions, which should be imported before <code class="docutils literal notranslate"><span class="pre">app.run()</span></code> is called.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># interval example</span>
@@ -197,8 +198,8 @@
 <span class="n">scheduler</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="flask-context">
+</section>
+<section id="flask-context">
 <h2>Flask Context<a class="headerlink" href="#flask-context" title="Permalink to this headline">¶</a></h2>
 <p>If you wish to use anything from your Flask app context inside the job you can use something like this</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">blah</span><span class="p">():</span>
@@ -206,8 +207,8 @@
         <span class="c1"># do stuff</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
       </article>
       <footer>

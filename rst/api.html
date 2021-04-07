@@ -2,7 +2,8 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Examples" href="examples.html" /><link rel="prev" title="Logging" href="logging.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Examples" href="examples.html" /><link rel="prev" title="Logging" href="logging.html" />
 
     <meta name="generator" content="sphinx-3.5.3, furo 2021.03.20.beta30"/>
         <title>API - Flask APScheduler</title>
@@ -39,8 +40,8 @@
   }
 </style><link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" href="../_static/styles/furo-extensions.css?digest=d391b54134226e4196576da3bdb6dddb7e05ba2b"></head>
   <body dir="">
@@ -135,7 +136,7 @@
         <label class="toc-overlay-icon toc-content-icon" for="__toc">
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
-        <div class="section" id="api">
+        <section id="api">
 <h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
 <p>Flask-APScheduler comes with a build-in API. This can be enabled/disabled in your flask configuration.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SCHEDULER_API_ENABLED</span><span class="p">:</span> <span class="kc">True</span>
@@ -152,7 +153,7 @@
 <li><p>/scheduler/jobs/&lt;job_id&gt;/resume [POST] &gt; resumes a job, returns json of job details</p></li>
 <li><p>/scheduler/jobs/&lt;job_id&gt;/run [POST] &gt; runs a job now, returns json of job details</p></li>
 </ul>
-<div class="section" id="scheduler">
+<section id="scheduler">
 <h2>Scheduler<a class="headerlink" href="#scheduler" title="Permalink to this headline">¶</a></h2>
 <p>Other commands can be passed to the scheduler and are rather self explanatory:</p>
 <ul class="simple">
@@ -172,8 +173,8 @@
 <li><p>scheduler.run_job(&lt;id&gt;, **&lt;jobstore&gt;)</p></li>
 <li><p>scheduler.authenticate(&lt;function&gt;)</p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
       </article>
       <footer>
