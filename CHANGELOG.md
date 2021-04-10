@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.12.2
+ - Fix issue [#139](https://github.com/viniciuschiele/flask-apscheduler/issues/139). Thanks [Gkirito](https://github.com/Gkirito) for the PR.
+
 ### Version 1.12.1
  - Revert PR [#140](https://github.com/viniciuschiele/flask-apscheduler/pull/140)
 
