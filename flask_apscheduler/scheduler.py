@@ -14,13 +14,13 @@
 
 """APScheduler implementation."""
 
+import flask
 import functools
 import logging
 import socket
 import warnings
-
-import flask
 import werkzeug
+
 from apscheduler.events import EVENT_ALL
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
