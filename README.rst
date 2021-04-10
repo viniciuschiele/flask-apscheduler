@@ -12,6 +12,7 @@ Features
 - Allows to specify the hostname which the scheduler will run on.
 - Provides a REST API to manage the scheduled jobs.
 - Provides authentication for the REST API.
+- Integrates with `Flask Blueprints <https://github.com/viniciuschiele/flask-apscheduler/tree/master/examples/application_factory>`_
 
 Installation
 ===============
