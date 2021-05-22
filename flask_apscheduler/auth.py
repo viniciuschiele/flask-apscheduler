@@ -17,21 +17,7 @@
 import base64
 
 from flask import request
-
-
-def wsgi_to_bytes(data):
-    """coerce wsgi unicode represented bytes to real ones"""
-    if isinstance(data, bytes):
-        return data
-    return data.encode("latin1")  # XXX: utf8 fallback?
-
-
-def bytes_to_wsgi(data):
-    assert isinstance(data, bytes), "data must be bytes"
-    if isinstance(data, str):
-        return data
-    else:
-        return data.decode("latin1")
+from .utils import bytes_to_wsgi, wsgi_to_bytes
 
 
 def get_authorization_header():

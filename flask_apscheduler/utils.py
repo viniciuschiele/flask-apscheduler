@@ -147,3 +147,18 @@ def extract_timedelta(delta):
     mm, ss = divmod(delta.seconds, 60)
     hh, mm = divmod(mm, 60)
     return w, d, hh, mm, ss
+
+
+def bytes_to_wsgi(data):
+    assert isinstance(data, bytes), "data must be bytes"
+    if isinstance(data, str):
+        return data
+    else:
+        return data.decode("latin1")
+
+
+def wsgi_to_bytes(data):
+    """coerce wsgi unicode represented bytes to real ones"""
+    if isinstance(data, bytes):
+        return data
+    return data.encode("latin1")  # XXX: utf8 fallback?
