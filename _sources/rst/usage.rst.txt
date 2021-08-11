@@ -81,3 +81,5 @@ If you wish to use anything from your Flask app context inside the job you can u
     def blah():
         with scheduler.app.app_context():
             # do stuff
+            
+If you are making use of Flask-SQLAlchemy and performing DB operations within a job, make sure that you make a call to `db.session.commit()`, in addition to providing the Flask app context.
