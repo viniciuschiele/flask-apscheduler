@@ -21,6 +21,7 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 from collections import OrderedDict
+from functools import wraps
 
 
 def job_to_dict(job):
@@ -162,3 +163,14 @@ def wsgi_to_bytes(data):
     if isinstance(data, bytes):
         return data
     return data.encode("latin1")  # XXX: utf8 fallback?
+
+
+def with_app_context(app, func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not app:
+            return func(*args, **kwargs)
+        with app.app_context():
+            return func(*args, **kwargs)         
+
+    return wrapper

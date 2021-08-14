@@ -26,7 +26,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
 from flask import make_response
 from . import api
-from .utils import fix_job_def, pop_trigger
+from .utils import fix_job_def, pop_trigger, with_app_context
 
 LOGGER = logging.getLogger('flask_apscheduler')
 
@@ -81,6 +81,7 @@ class APScheduler(object):
         self.app.apscheduler = self
 
         self._load_config()
+        self._apply_app_context()
         self._load_jobs()
 
         if self.api_enabled:
@@ -281,7 +282,11 @@ class APScheduler(object):
         if not job:
             raise JobLookupError(id)
 
-        job.func(*job.args, **job.kwargs)
+        if self.app:
+            with self.app.app_context():
+                job.func(*job.args, **job.kwargs)
+        else:
+            job.func(*job.args, **job.kwargs)
 
     def authenticate(self, func):
         """
@@ -304,6 +309,10 @@ class APScheduler(object):
         executors = self.app.config.get('SCHEDULER_EXECUTORS')
         if executors:
             options['executors'] = executors
+
+        if 'executors' not in options:
+            # APScheduler adds the default 'executor' at execution time rather than at configuration time, we need it at conf time in order to apply Flask app context.
+            options['executors'] = {'default': {'type': 'threadpool'}}
 
         job_defaults = self.app.config.get('SCHEDULER_JOB_DEFAULTS')
         if job_defaults:
@@ -370,6 +379,23 @@ class APScheduler(object):
             methods=[method]
         )
 
+    def _apply_app_context(self):
+        """
+        Apply Flask application context to the scheduler executors.
+        """
+        import importlib, six
+        with self._scheduler._executors_lock:
+            for alias, executor in six.iteritems(self._scheduler._executors):
+                try:
+                    module_name = executor.__module__
+                    module = importlib.import_module(module_name)
+                except ModuleNotFoundError:
+                    LOGGER.error(f'Unable to add Flask app context to {module_name}.')
+                    continue
+                
+                if 'run_job' in vars(module):
+                    vars(module)['run_job'] = with_app_context(self.app, vars(module)['run_job'])
+                
     def _apply_auth(self, view_func):
         """
         Apply decorator to authenticate the user who is making the request.
