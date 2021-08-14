@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from apscheduler.jobstores.base import ConflictingIdError, JobLookupError
+from apscheduler.schedulers import SchedulerAlreadyRunningError, SchedulerNotRunningError
 from collections import OrderedDict
 from flask import current_app, request, Response
 from .json import jsonify
@@ -30,6 +31,60 @@ def get_scheduler_info():
     ])
 
     return jsonify(d)
+
+
+def pause_scheduler():
+    """
+    Pause job processing in the scheduler.
+
+    This will prevent the scheduler from waking up to do job processing until :meth:`resume`
+    is called. It will not however stop any already running job processing.
+    """
+    try:
+        current_app.apscheduler.pause()
+        return Response(status=204)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
+def resume_scheduler():
+    """
+    Resume job processing in the scheduler.
+    """
+
+    try:
+        current_app.apscheduler.resume()
+        return Response(status=204)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
+def start_scheduler():
+    """
+    Start the scheduler.
+    """
+
+    try:
+        current_app.apscheduler.start()
+        return Response(status=204)
+    except SchedulerAlreadyRunningError as e:
+        return jsonify(dict(error_message=str(e)), status=400)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
+def shutdown_scheduler():
+    """
+    Shut down the scheduler. Does not interrupt any currently running jobs.
+    """
+
+    try:
+        current_app.apscheduler.shutdown()
+        return Response(status=204)
+    except SchedulerNotRunningError as e:
+        return jsonify(dict(error_message=str(e)), status=400)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
 
 
 def add_job():

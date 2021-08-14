@@ -3,7 +3,7 @@ import json
 
 from werkzeug.routing import BuildError
 from flask import Flask, url_for
-from flask_apscheduler import APScheduler
+from flask_apscheduler import APScheduler, STATE_PAUSED, STATE_RUNNING, STATE_STOPPED
 from flask_apscheduler.auth import HTTPBasicAuth
 from unittest import TestCase
 from pytz import utc
@@ -18,6 +18,7 @@ class TestAPI(TestCase):
         self.scheduler.start()
         self.client = self.app.test_client()
 
+
     def test_scheduler_info(self):
         response = self.client.get(self.scheduler.api_prefix)
         self.assertEqual(response.status_code, 200)
@@ -25,6 +26,65 @@ class TestAPI(TestCase):
         self.assertIsNotNone(info['current_host'])
         self.assertEqual(info['allowed_hosts'], ['*'])
         self.assertTrue(info['running'])
+
+
+    def test_pause_scheduler(self):
+        response = self.client.post(self.scheduler.api_prefix + '/pause')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.scheduler.state, STATE_PAUSED)
+
+
+    def test_pause_scheduler_already_paused(self):
+        self.scheduler.pause()
+        self.assertEqual(self.scheduler.state, STATE_PAUSED)
+
+        response = self.client.post(self.scheduler.api_prefix + '/pause')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.scheduler.state, STATE_PAUSED)
+
+
+    def test_resume_scheduler(self):
+        self.scheduler.pause()
+        self.assertEqual(self.scheduler.state, STATE_PAUSED)
+
+        response = self.client.post(self.scheduler.api_prefix + '/resume')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.scheduler.state, STATE_RUNNING)
+
+
+    def test_resume_scheduler_already_running(self):
+        response = self.client.post(self.scheduler.api_prefix + '/resume')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.scheduler.state, STATE_RUNNING)
+
+
+    def test_start_scheduler(self):
+        self.scheduler.shutdown()
+        self.assertEqual(self.scheduler.state, STATE_STOPPED)
+
+        response = self.client.post(self.scheduler.api_prefix + '/start')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.scheduler.state, STATE_RUNNING)
+
+
+    def test_start_scheduler_already_running(self):
+        response = self.client.post(self.scheduler.api_prefix + '/start')
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_shutdown_scheduler(self):
+        response = self.client.post(self.scheduler.api_prefix + '/shutdown')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.scheduler.state, STATE_STOPPED)
+
+
+    def test_shutdown_scheduler_already_stopped(self):
+        self.scheduler.shutdown()
+        self.assertEqual(self.scheduler.state, STATE_STOPPED)
+
+        response = self.client.post(self.scheduler.api_prefix + '/shutdown')
+        self.assertEqual(response.status_code, 400)
+
 
     def test_add_job(self):
         job = {
