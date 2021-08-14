@@ -35,7 +35,7 @@ def get_scheduler_info():
 
 def pause_scheduler():
     """
-    Pause job processing in the scheduler.
+    Pauses job processing in the scheduler.
 
     This will prevent the scheduler from waking up to do job processing until :meth:`resume`
     is called. It will not however stop any already running job processing.
@@ -49,7 +49,7 @@ def pause_scheduler():
 
 def resume_scheduler():
     """
-    Resume job processing in the scheduler.
+    Resumes job processing in the scheduler.
     """
 
     try:
@@ -61,7 +61,7 @@ def resume_scheduler():
 
 def start_scheduler():
     """
-    Start the scheduler.
+    Starts the scheduler.
     """
 
     try:
@@ -75,7 +75,7 @@ def start_scheduler():
 
 def shutdown_scheduler():
     """
-    Shut down the scheduler. Does not interrupt any currently running jobs.
+    Shuts down the scheduler. Does not interrupt any currently running jobs.
     """
 
     try:
