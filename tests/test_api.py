@@ -6,7 +6,8 @@ from flask import Flask, url_for
 from flask_apscheduler import APScheduler
 from flask_apscheduler.auth import HTTPBasicAuth
 from unittest import TestCase
-from pytz import utc
+from datetime import datetime
+from dateutil.tz import tzlocal
 
 
 class TestAPI(TestCase):
@@ -120,7 +121,7 @@ class TestAPI(TestCase):
             'args': [1],
             'trigger': 'cron',
             'minute': '*/1',
-            'start_date': '2025-01-01'
+            'start_date': '2025-01-01' # means midnight local time
         }
 
         response = self.client.patch(self.scheduler.api_prefix + '/jobs/job1', data=json.dumps(data_to_update))
@@ -132,8 +133,8 @@ class TestAPI(TestCase):
         self.assertEqual(job.get('func'), job2.get('func'))
         self.assertEqual(data_to_update.get('args'), job2.get('args'))
         self.assertEqual(data_to_update.get('trigger'), job2.get('trigger'))
-        self.assertEqual('2025-01-01T00:00:00+00:00', job2.get('start_date'))
-        self.assertEqual('2025-01-01T00:00:00+00:00', job2.get('next_run_time'))
+        self.assertEqual(datetime(2025, 1, 1, tzinfo=tzlocal()).isoformat(), job2.get('start_date'))
+        self.assertEqual(datetime(2025, 1, 1, tzinfo=tzlocal()).isoformat(), job2.get('next_run_time'))
 
     def test_update_job_not_found(self):
         data_to_update = {
