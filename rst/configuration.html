@@ -197,10 +197,10 @@
           <section id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
 <p>Configuration options specific to <code class="docutils literal notranslate"><span class="pre">Flask-APScheduler</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SCHEDULER_API_ENABLED</span><span class="p">:</span> <span class="nb">bool</span>
-<span class="n">SCHEDULER_API_PREFIX</span><span class="p">:</span> <span class="nb">str</span>
-<span class="n">SCHEDULER_ENDPOINT_PREFIX</span><span class="p">:</span> <span class="nb">str</span>
-<span class="n">SCHEDULER_ALLOWED_HOSTS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SCHEDULER_API_ENABLED</span><span class="p">:</span> <span class="nb">bool</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">SCHEDULER_API_PREFIX</span><span class="p">:</span> <span class="nb">str</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="s2">"/scheduler"</span><span class="p">)</span>
+<span class="n">SCHEDULER_ENDPOINT_PREFIX</span><span class="p">:</span> <span class="nb">str</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="s2">"scheduler."</span><span class="p">)</span>
+<span class="n">SCHEDULER_ALLOWED_HOSTS</span><span class="p">:</span> <span class="nb">list</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="p">[</span><span class="s2">"*"</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Configuration options specific to <code class="docutils literal notranslate"><span class="pre">APScheduler</span></code>:</p>
