@@ -7,10 +7,10 @@ Configuration options specific to ``Flask-APScheduler``:
 
 .. code-block:: python
 
-    SCHEDULER_API_ENABLED: bool
-    SCHEDULER_API_PREFIX: str
-    SCHEDULER_ENDPOINT_PREFIX: str
-    SCHEDULER_ALLOWED_HOSTS: list[str]
+    SCHEDULER_API_ENABLED: bool (default: False)
+    SCHEDULER_API_PREFIX: str (default: "/scheduler")
+    SCHEDULER_ENDPOINT_PREFIX: str (default: "scheduler.")
+    SCHEDULER_ALLOWED_HOSTS: list (default: ["*"])
 
 Configuration options specific to ``APScheduler``:
 
