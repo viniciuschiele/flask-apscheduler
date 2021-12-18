@@ -1,5 +1,9 @@
 # Changelog
 
+### Version 1.12.3
+ - Fix issue [#120](https://github.com/viniciuschiele/flask-apscheduler/issues/120). Thanks [guru-florida](https://github.com/guru-florida) for the PR.
+ - Fix issue [#165](https://github.com/viniciuschiele/flask-apscheduler/issues/165). Thanks [christopherpickering](https://github.com/christopherpickering) for the PR.
+
 ### Version 1.12.2
  - Fix issue [#139](https://github.com/viniciuschiele/flask-apscheduler/issues/139). Thanks [Gkirito](https://github.com/Gkirito) for the PR.
 
