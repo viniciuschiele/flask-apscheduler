@@ -197,10 +197,20 @@
           <section id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
 <p>Configuration options specific to <code class="docutils literal notranslate"><span class="pre">Flask-APScheduler</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SCHEDULER_API_ENABLED</span><span class="p">:</span> <span class="o">&lt;</span><span class="kc">True</span> <span class="ow">or</span> <span class="kc">False</span><span class="o">&gt;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SCHEDULER_API_ENABLED</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="n">SCHEDULER_API_PREFIX</span><span class="p">:</span> <span class="nb">str</span>
+<span class="n">SCHEDULER_ENDPOINT_PREFIX</span><span class="p">:</span> <span class="nb">str</span>
+<span class="n">SCHEDULER_ALLOWED_HOSTS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Other configuration options are included from <a class="reference external" href="https://apscheduler.readthedocs.io/en/stable/userguide.html#configuring-the-scheduler">APScheduler</a></p>
+<p>Configuration options specific to <code class="docutils literal notranslate"><span class="pre">APScheduler</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SCHEDULER_JOBSTORES</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="n">SCHEDULER_EXECUTORS</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="n">SCHEDULER_JOB_DEFAULTS</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="n">SCHEDULER_TIMEZONE</span><span class="p">:</span> <span class="nb">dict</span>
+</pre></div>
+</div>
+<p>For more details, check out <a class="reference external" href="https://apscheduler.readthedocs.io/en/stable/userguide.html#configuring-the-scheduler">APScheduler</a></p>
 </section>
 
         </article>
