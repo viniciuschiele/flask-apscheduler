@@ -18,7 +18,7 @@ def dumps(obj, indent=None):
 
 def jsonify(data, status=None):
     indent = None
-    if flask.current_app.config['JSONIFY_PRETTYPRINT_REGULAR'] and not flask.request.is_xhr:
+    if flask.current_app.config['JSONIFY_PRETTYPRINT_REGULAR']:
         indent = 2
     return flask.current_app.response_class(dumps(data, indent=indent), status=status, mimetype='application/json')
 
