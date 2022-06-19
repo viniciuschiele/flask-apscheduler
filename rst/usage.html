@@ -5,14 +5,14 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Logging" href="logging.html" /><link rel="prev" title="Configuration" href="configuration.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
         <title>Basic Application - Flask APScheduler</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
@@ -186,7 +186,8 @@
           </svg>
           <span>Back to top</span>
         </a>
-        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -223,13 +224,13 @@
 
 <span class="c1"># initialize scheduler</span>
 <span class="n">scheduler</span> <span class="o">=</span> <span class="n">APScheduler</span><span class="p">()</span>
-<span class="c1"># if you don't wanna use a config, you can set options here:</span>
+<span class="c1"># if you don&#39;t wanna use a config, you can set options here:</span>
 <span class="c1"># scheduler.api_enabled = True</span>
 <span class="n">scheduler</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
 <span class="n">scheduler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -238,20 +239,20 @@
 <h2>Adding Jobs<a class="headerlink" href="#adding-jobs" title="Permalink to this headline">#</a></h2>
 <p>Jobs can be added to the scheduler when the app starts. They are created in decorated functions, which should be imported before <code class="docutils literal notranslate"><span class="pre">app.run()</span></code> is called.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># interval example</span>
-<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">'interval'</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">'do_job_1'</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">misfire_grace_time</span><span class="o">=</span><span class="mi">900</span><span class="p">)</span>
+<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;interval&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;do_job_1&#39;</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">misfire_grace_time</span><span class="o">=</span><span class="mi">900</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">job1</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">'Job 1 executed'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Job 1 executed&#39;</span><span class="p">)</span>
 
 
 <span class="c1"># cron examples</span>
-<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">'cron'</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">'do_job_2'</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="s1">'*'</span><span class="p">)</span>
+<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;cron&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;do_job_2&#39;</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">job2</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">'Job 2 executed'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Job 2 executed&#39;</span><span class="p">)</span>
 
 
-<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">'cron'</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">'do_job_3'</span><span class="p">,</span> <span class="n">week</span><span class="o">=</span><span class="s1">'*'</span><span class="p">,</span> <span class="n">day_of_week</span><span class="o">=</span><span class="s1">'sun'</span><span class="p">)</span>
+<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;cron&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;do_job_3&#39;</span><span class="p">,</span> <span class="n">week</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">day_of_week</span><span class="o">=</span><span class="s1">&#39;sun&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">job3</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">'Job 3 executed'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Job 3 executed&#39;</span><span class="p">)</span>
 
 
 <span class="n">scheduler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>

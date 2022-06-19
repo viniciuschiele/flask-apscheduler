@@ -5,14 +5,14 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Examples" href="examples.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
         <title>Tips - Flask APScheduler</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" />
     <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
@@ -186,7 +186,8 @@
           </svg>
           <span>Back to top</span>
         </a>
-        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -235,7 +236,7 @@
 
 <span class="c1"># app/tasks.py</span>
 
-<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">'cron'</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">'do_renewals'</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;cron&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;do_renewals&#39;</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">scheduled_function</span><span class="p">():</span>
     <span class="c1"># your scheduled task code here</span>
 </pre></div>
@@ -259,7 +260,7 @@
 <p>You could accomplish the same by importing modules that contain decorated functions (un-nested, at the module level):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/tasks.py</span>
 
-<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">'cron'</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">'do_renewals'</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;cron&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;do_renewals&#39;</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">scheduled_function</span><span class="p">():</span>
     <span class="c1"># your scheduled task code here</span>
 
@@ -275,7 +276,7 @@
 <span class="k">def</span> <span class="nf">do_stuff</span><span class="p">():</span>
   <span class="c1"># do some stuff before registering a task</span>
   <span class="c1"># then attempt to register a task, which will fail due to nesting</span>
-  <span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">'cron'</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">'do_renewals'</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+  <span class="nd">@scheduler</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="s1">&#39;cron&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;do_renewals&#39;</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
   <span class="k">def</span> <span class="nf">scheduled_function</span><span class="p">():</span>
     <span class="c1"># your scheduled task code here</span>
 </pre></div>
