@@ -36,7 +36,7 @@ Please use the Issues_ for feature requests and troubleshooting usage.
    :target: https://pypi.python.org/pypi/Flask-APScheduler
 
 .. |Build| image:: https://github.com/viniciuschiele/flask-apscheduler/actions/workflows/test.yml/badge.svg
-    :target: https://github.com/viniciuschiele/flask-apscheduler/actions/workflows/test.yaml
+    :target: https://github.com/viniciuschiele/flask-apscheduler/actions/workflows/test.yml
 
 .. |Coverage| image:: https://codecov.io/github/viniciuschiele/flask-apscheduler/coverage.svg
     :target: https://codecov.io/github/viniciuschiele/flask-apscheduler

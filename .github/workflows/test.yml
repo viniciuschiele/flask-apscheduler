@@ -1,4 +1,4 @@
-name: Run the test suite
+name: Tests
 
 on:
   push:
