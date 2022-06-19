@@ -1,5 +1,9 @@
 # Changelog
 
+### Version 1.12.4
+ - Add logging to API endpoints [#197](https://github.com/viniciuschiele/flask-apscheduler/pull/197).
+ - Fix issue [#203](https://github.com/viniciuschiele/flask-apscheduler/issues/203).
+ 
 ### Version 1.12.3
  - Fix issue [#120](https://github.com/viniciuschiele/flask-apscheduler/issues/120). Thanks [guru-florida](https://github.com/guru-florida) for the PR.
  - Fix issue [#165](https://github.com/viniciuschiele/flask-apscheduler/issues/165). Thanks [christopherpickering](https://github.com/christopherpickering) for the PR.
