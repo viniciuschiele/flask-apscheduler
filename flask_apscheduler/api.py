@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from apscheduler.jobstores.base import ConflictingIdError, JobLookupError
 from apscheduler.schedulers import SchedulerAlreadyRunningError, SchedulerNotRunningError
 from collections import OrderedDict
@@ -100,8 +102,10 @@ def add_job():
         job = current_app.apscheduler.add_job(**data)
         return jsonify(job)
     except ConflictingIdError:
+        logging.warning('Job %s already exists.' % data.get('id'))
         return jsonify(dict(error_message='Job %s already exists.' % data.get('id')), status=409)
     except Exception as e:
+        logging.error(e, exc_info=True)
         return jsonify(dict(error_message=str(e)), status=500)
 
 
@@ -112,8 +116,10 @@ def delete_job(job_id):
         current_app.apscheduler.remove_job(job_id)
         return Response(status=204)
     except JobLookupError:
+        logging.warning('Job %s not found.' % job_id)
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
     except Exception as e:
+        logging.error(e, exc_info=True)
         return jsonify(dict(error_message=str(e)), status=500)
 
 
@@ -123,6 +129,7 @@ def get_job(job_id):
     job = current_app.apscheduler.get_job(job_id)
 
     if not job:
+        logging.warning('Job %s not found.' % job_id)
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
 
     return jsonify(job)
@@ -151,8 +158,10 @@ def update_job(job_id):
         job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
     except JobLookupError:
+        logging.warning('Job %s not found.' % job_id)
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
     except Exception as e:
+        logging.error(e, exc_info=True)
         return jsonify(dict(error_message=str(e)), status=500)
 
 
@@ -164,8 +173,10 @@ def pause_job(job_id):
         job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
     except JobLookupError:
+        logging.warning('Job %s not found.' % job_id)
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
     except Exception as e:
+        logging.error(e, exc_info=True)
         return jsonify(dict(error_message=str(e)), status=500)
 
 
@@ -177,8 +188,10 @@ def resume_job(job_id):
         job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
     except JobLookupError:
+        logging.warning('Job %s not found.' % job_id)
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
     except Exception as e:
+        logging.error(e, exc_info=True)
         return jsonify(dict(error_message=str(e)), status=500)
 
 
@@ -190,6 +203,8 @@ def run_job(job_id):
         job = current_app.apscheduler.get_job(job_id)
         return jsonify(job)
     except JobLookupError:
+        logging.warning('Job %s not found.' % job_id)
         return jsonify(dict(error_message='Job %s not found' % job_id), status=404)
     except Exception as e:
+        logging.error(e, exc_info=True)
         return jsonify(dict(error_message=str(e)), status=500)
