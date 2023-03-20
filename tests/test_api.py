@@ -7,6 +7,7 @@ from flask_apscheduler import APScheduler, STATE_PAUSED, STATE_RUNNING, STATE_ST
 from flask_apscheduler.auth import HTTPBasicAuth
 from unittest import TestCase
 from pytz import utc
+from datetime import date, datetime
 
 
 class TestAPI(TestCase):
@@ -76,12 +77,28 @@ class TestAPI(TestCase):
         response = self.client.post(self.scheduler.api_prefix + '/shutdown')
         self.assertEqual(response.status_code, 400)
 
+    def test_force_shutdown_scheduler(self):
+        response = self.client.post(self.scheduler.api_prefix + '/shutdown', json={'wait':'False'})
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.scheduler.state, STATE_STOPPED)
+
+    def test_force_shutdown_scheduler_already_stopped(self):
+        self.scheduler.shutdown()
+        self.assertEqual(self.scheduler.state, STATE_STOPPED)
+
+        response = self.client.post(self.scheduler.api_prefix + '/shutdown', json={'wait':'False'})
+        self.assertEqual(response.status_code, 400)
+
     def test_add_job(self):
+
+        today = date.today()
+        test_date = datetime(today.year + 1, today.month, today.day)
+        iso_date = str(test_date.astimezone().isoformat())
         job = {
             'id': 'job1',
             'func': 'tests.test_api:job1',
             'trigger': 'date',
-            'run_date': '2025-12-01T12:30:01+00:00',
+            'run_date': iso_date,
         }
 
         response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
@@ -95,11 +112,14 @@ class TestAPI(TestCase):
         self.assertEqual(job.get('run_date'), job2.get('run_date'))
 
     def test_add_conflicted_job(self):
+        today = date.today()
+        test_date = datetime(today.year + 1, today.month, today.day)
+        iso_date = str(test_date.astimezone().isoformat())
         job = {
             'id': 'job1',
             'func': 'tests.test_api:job1',
             'trigger': 'date',
-            'run_date': '2025-12-01T12:30:01+00:00',
+            'run_date': iso_date,
         }
 
         response = self.client.post(self.scheduler.api_prefix + '/jobs', data=json.dumps(job))
@@ -166,11 +186,15 @@ class TestAPI(TestCase):
     def test_update_job(self):
         job = self.__add_job()
 
+        today = date.today()
+        test_date = datetime(today.year + 1, today.month, today.day)
+        iso_date = str(test_date.astimezone().isoformat())
+
         data_to_update = {
             'args': [1],
             'trigger': 'cron',
             'minute': '*/1',
-            'start_date': '2025-01-01'
+            'start_date': str(test_date.date())
         }
 
         response = self.client.patch(self.scheduler.api_prefix + '/jobs/job1', data=json.dumps(data_to_update))
@@ -182,15 +206,18 @@ class TestAPI(TestCase):
         self.assertEqual(job.get('func'), job2.get('func'))
         self.assertEqual(data_to_update.get('args'), job2.get('args'))
         self.assertEqual(data_to_update.get('trigger'), job2.get('trigger'))
-        self.assertEqual('2025-01-01T00:00:00+00:00', job2.get('start_date'))
-        self.assertEqual('2025-01-01T00:00:00+00:00', job2.get('next_run_time'))
+        self.assertEqual(iso_date, job2.get('start_date'))
+        self.assertEqual(iso_date, job2.get('next_run_time'))
 
     def test_update_job_not_found(self):
+        today = date.today()
+        test_date = date(today.year + 1, today.month, today.day)
+
         data_to_update = {
             'args': [1],
             'trigger': 'cron',
             'minute': '*/1',
-            'start_date': '2025-01-01'
+            'start_date': str(test_date)
         }
 
         response = self.client.patch(self.scheduler.api_prefix + '/jobs/job1', data=json.dumps(data_to_update))
