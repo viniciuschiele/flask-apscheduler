@@ -14,7 +14,6 @@
 
 """APScheduler implementation."""
 
-import flask
 import functools
 import logging
 import socket
@@ -25,6 +24,7 @@ from apscheduler.events import EVENT_ALL
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
 from flask import make_response
+from flask.helpers import get_debug_flag
 from . import api
 from .utils import fix_job_def, pop_trigger
 
@@ -94,7 +94,7 @@ class APScheduler(object):
 
         # Flask in debug mode spawns a child process so that it can restart the process each time your code changes,
         # the new child process initializes and starts a new APScheduler causing the jobs to run twice.
-        if flask.helpers.get_debug_flag() and not werkzeug.serving.is_running_from_reloader():
+        if get_debug_flag() and not werkzeug.serving.is_running_from_reloader():
             return
 
         if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:

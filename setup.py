@@ -5,7 +5,7 @@ with open("README.rst", "r", encoding="utf-8") as fh:
 
 setup(
     name='Flask-APScheduler',
-    version='1.12.2',
+    version='1.12.4',
     packages=['flask_apscheduler'],
     url='https://github.com/viniciuschiele/flask-apscheduler',
     license='Apache 2.0',
@@ -16,7 +16,8 @@ setup(
     long_description_content_type='text/x-rst',
     keywords=['apscheduler', 'scheduler', 'scheduling', 'cron'],
     install_requires=['flask>=0.10.1', 'apscheduler>=3.2.0,<4.0.0', 'python-dateutil>=2.4.2'],
-    data_files=[('', ['LICENSE'])],
+    package_data={'Flask-APScheduler': ['LICENSE']},
+    include_package_data=True,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
