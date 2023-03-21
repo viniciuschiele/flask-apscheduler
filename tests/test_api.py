@@ -66,8 +66,9 @@ class TestAPI(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_shutdown_scheduler(self):
-        response = self.client.post(self.scheduler.api_prefix + '/start')
+        self.client.post(self.scheduler.api_prefix + '/start')
         response = self.client.post(self.scheduler.api_prefix + '/shutdown')
+
         self.assertEqual(response.status_code, 204)
         self.assertEqual(self.scheduler.state, STATE_STOPPED)
 

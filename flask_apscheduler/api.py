@@ -81,8 +81,9 @@ def shutdown_scheduler():
     """
 
     try:
-        data = request.get_json() or {}
+        data = request.get_json(silent=True, force=True) or {}
         wait = data.get('wait') is not False
+
         current_app.apscheduler.shutdown(wait=wait)
         return Response(status=204)
     except SchedulerNotRunningError as e:
