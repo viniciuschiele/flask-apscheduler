@@ -74,15 +74,13 @@ def start_scheduler():
 
 
 def shutdown_scheduler():
-
-
     """
     Shuts down the scheduler. Does not interrupt any currently running jobs.
     """
-    data = request.get_json()
-    wait = (data['wait'] if data and 'wait' in data else "true") != "False"
 
     try:
+        data = request.get_json() or {}
+        wait = data.get('wait') is not False
         current_app.apscheduler.shutdown(wait=wait)
         return Response(status=204)
     except SchedulerNotRunningError as e:

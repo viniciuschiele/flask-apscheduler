@@ -66,6 +66,7 @@ class TestAPI(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_shutdown_scheduler(self):
+        response = self.client.post(self.scheduler.api_prefix + '/start')
         response = self.client.post(self.scheduler.api_prefix + '/shutdown')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(self.scheduler.state, STATE_STOPPED)
@@ -78,7 +79,8 @@ class TestAPI(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_force_shutdown_scheduler(self):
-        response = self.client.post(self.scheduler.api_prefix + '/shutdown', json={'wait':'False'})
+        self.client.post(self.scheduler.api_prefix + '/start')
+        response = self.client.post(self.scheduler.api_prefix + '/shutdown', json={'wait':False})
         self.assertEqual(response.status_code, 204)
         self.assertEqual(self.scheduler.state, STATE_STOPPED)
 
@@ -86,11 +88,10 @@ class TestAPI(TestCase):
         self.scheduler.shutdown()
         self.assertEqual(self.scheduler.state, STATE_STOPPED)
 
-        response = self.client.post(self.scheduler.api_prefix + '/shutdown', json={'wait':'False'})
+        response = self.client.post(self.scheduler.api_prefix + '/shutdown', json={'wait':False})
         self.assertEqual(response.status_code, 400)
 
     def test_add_job(self):
-
         today = date.today()
         test_date = datetime(today.year + 1, today.month, today.day)
         iso_date = str(test_date.astimezone().isoformat())
