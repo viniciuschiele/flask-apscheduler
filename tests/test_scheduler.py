@@ -1,9 +1,11 @@
+import apscheduler
+import datetime
+
 from flask import Flask
 from flask_apscheduler import APScheduler, utils
-from unittest import TestCase
-import apscheduler
 from pytz import utc
-import datetime
+from unittest import TestCase
+
 
 class TestScheduler(TestCase):
     def setUp(self):
@@ -61,7 +63,6 @@ class TestScheduler(TestCase):
         job = self.scheduler.get_job('job1')
         self.assertIsNotNone(job)
 
-
     def test_state_prop(self):
         self.scheduler.init_app(self.app)
         self.scheduler.start()
@@ -111,22 +112,6 @@ class TestScheduler(TestCase):
         self.scheduler.shutdown()
         self.assertFalse(self.scheduler.running)
 
-    def test_add_delete_job(self):
-        @self.scheduler.task('interval', seconds=10, id='job1')
-        def decorated_job():
-            pass
-
-        self.scheduler.init_app(self.app)
-        self.scheduler.start()
-        job = self.scheduler.get_job('job1')
-        self.assertIsNotNone(job)
-
-        self.scheduler.delete_job('job1')
-        self.assertFalse(self.scheduler.get_job('job1'))
-        self.scheduler.shutdown()
-        self.assertFalse(self.scheduler.running)
-
-
     def test_add_remove_all_jobs(self):
         @self.scheduler.task('interval', hours=1, id='job1')
         def decorated_job():
@@ -148,27 +133,6 @@ class TestScheduler(TestCase):
         self.scheduler.shutdown()
         self.assertFalse(self.scheduler.running)
 
-    def test_add_delete_all_jobs(self):
-        @self.scheduler.task('interval', hours=1, id='job1')
-        def decorated_job():
-            pass
-
-        @self.scheduler.task('interval', hours=1, id='job2')
-        def decorated_job2():
-            pass
-
-        self.scheduler.init_app(self.app)
-        self.scheduler.start()
-        jobs = self.scheduler.get_jobs()
-        self.assertTrue(len(jobs) == 2)
-        self.scheduler.delete_all_jobs()
-
-        self.assertFalse(self.scheduler.get_job('job1'))
-        self.assertFalse(self.scheduler.get_job('job2'))
-
-        self.scheduler.shutdown()
-        self.assertFalse(self.scheduler.running)
-
     def test_job_to_dict(self):
         @self.scheduler.task('interval', hours=1, id='job1', end_date=datetime.datetime.now(), weeks=1, days=1, seconds=99)
         def decorated_job():
@@ -179,7 +143,7 @@ class TestScheduler(TestCase):
         self.assertIsNotNone(job)
 
         self.assertTrue(len(utils.job_to_dict(job)))
-        self.scheduler.delete_job('job1')
+        self.scheduler.remove_job('job1')
         self.assertFalse(self.scheduler.get_job('job1'))
         self.scheduler.shutdown()
         self.assertFalse(self.scheduler.running)
