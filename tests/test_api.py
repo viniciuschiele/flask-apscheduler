@@ -6,7 +6,6 @@ from flask import Flask, url_for
 from flask_apscheduler import APScheduler, STATE_PAUSED, STATE_RUNNING, STATE_STOPPED
 from flask_apscheduler.auth import HTTPBasicAuth
 from unittest import TestCase
-from pytz import utc
 from datetime import date, datetime
 
 
