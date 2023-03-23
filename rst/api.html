@@ -209,6 +209,11 @@
 </div>
 <ul class="simple">
 <li><p>/scheduler [GET] &gt; returns basic information about the webapp</p></li>
+<li><p>/scheduler/pause [POST] &gt; pauses job processing in the scheduler</p></li>
+<li><p>/scheduler/resume [POST] &gt; resumes job processing in the scheduler</p></li>
+<li><p>/scheduler/start [POST] &gt; starts the scheduler</p></li>
+<li><p>/scheduler/shutdown [POST] &gt; shuts down the scheduler with <cite>wait=True</cite></p></li>
+<li><p>/scheduler/shutdown [POST] + <cite>json={‘wait’:False}</cite> post data &gt; shuts down the scheduler with <cite>wait=False</cite></p></li>
 <li><p>/scheduler/jobs [POST json job data] &gt; adds a job to the scheduler</p></li>
 <li><p>/scheduler/jobs/&lt;job_id&gt; [GET] &gt; returns json of job details</p></li>
 <li><p>/scheduler/jobs [GET] &gt; returns json with details of all jobs</p></li>

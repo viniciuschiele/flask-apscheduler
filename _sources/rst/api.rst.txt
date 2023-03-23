@@ -10,6 +10,11 @@ Flask-APScheduler comes with a build-in API. This can be enabled/disabled in you
 
 
 - /scheduler [GET] > returns basic information about the webapp
+- /scheduler/pause [POST] > pauses job processing in the scheduler
+- /scheduler/resume [POST] > resumes job processing in the scheduler
+- /scheduler/start [POST] > starts the scheduler
+- /scheduler/shutdown [POST] > shuts down the scheduler with `wait=True`
+- /scheduler/shutdown [POST] + `json={'wait':False}` post data > shuts down the scheduler with `wait=False`
 - /scheduler/jobs [POST json job data] > adds a job to the scheduler
 - /scheduler/jobs/<job_id> [GET] > returns json of job details
 - /scheduler/jobs [GET] > returns json with details of all jobs
