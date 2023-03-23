@@ -42,7 +42,6 @@ def create_app():
 
     # pylint: disable=C0415, W0611
     with app.app_context():
-
         # pylint: disable=W0611
         if is_debug_mode() and not is_werkzeug_reloader_process():
             pass

@@ -340,6 +340,10 @@ class APScheduler(object):
         Add the routes for the scheduler API.
         """
         self._add_url_route('get_scheduler_info', '', api.get_scheduler_info, 'GET')
+        self._add_url_route('pause_scheduler', '/pause', api.pause_scheduler, 'POST')
+        self._add_url_route('resume_scheduler', '/resume', api.resume_scheduler, 'POST')
+        self._add_url_route('start_scheduler', '/start', api.start_scheduler, 'POST')
+        self._add_url_route('shutdown_scheduler', '/shutdown', api.shutdown_scheduler, 'POST')
         self._add_url_route('add_job', '/jobs', api.add_job, 'POST')
         self._add_url_route('get_job', '/jobs/<job_id>', api.get_job, 'GET')
         self._add_url_route('get_jobs', '/jobs', api.get_jobs, 'GET')

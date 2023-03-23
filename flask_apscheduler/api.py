@@ -15,6 +15,7 @@
 import logging
 
 from apscheduler.jobstores.base import ConflictingIdError, JobLookupError
+from apscheduler.schedulers import SchedulerAlreadyRunningError, SchedulerNotRunningError
 from collections import OrderedDict
 from flask import current_app, request, Response
 from .json import jsonify
@@ -32,6 +33,63 @@ def get_scheduler_info():
     ])
 
     return jsonify(d)
+
+
+def pause_scheduler():
+    """
+    Pauses job processing in the scheduler.
+
+    This will prevent the scheduler from waking up to do job processing until :meth:`resume`
+    is called. It will not however stop any already running job processing.
+    """
+    try:
+        current_app.apscheduler.pause()
+        return Response(status=204)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
+def resume_scheduler():
+    """
+    Resumes job processing in the scheduler.
+    """
+
+    try:
+        current_app.apscheduler.resume()
+        return Response(status=204)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
+def start_scheduler():
+    """
+    Starts the scheduler.
+    """
+
+    try:
+        current_app.apscheduler.start()
+        return Response(status=204)
+    except SchedulerAlreadyRunningError as e:
+        return jsonify(dict(error_message=str(e)), status=400)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
+
+
+def shutdown_scheduler():
+    """
+    Shuts down the scheduler. Does not interrupt any currently running jobs.
+    """
+
+    try:
+        data = request.get_json(silent=True, force=True) or {}
+        wait = data.get('wait') is not False
+
+        current_app.apscheduler.shutdown(wait=wait)
+        return Response(status=204)
+    except SchedulerNotRunningError as e:
+        return jsonify(dict(error_message=str(e)), status=400)
+    except Exception as e:
+        return jsonify(dict(error_message=str(e)), status=500)
 
 
 def add_job():
