@@ -6,29 +6,17 @@ import flask
 from apscheduler.job import Job
 from .utils import job_to_dict
 
-import json  # noqa
-
-
-loads = json.loads
-
-
-def dumps(obj, indent=None):
-    return json.dumps(obj, indent=indent, cls=JSONEncoder)
-
 
 def jsonify(data, status=None):
-    indent = None
-    if flask.current_app.config['JSONIFY_PRETTYPRINT_REGULAR']:
-        indent = 2
-    return flask.current_app.response_class(dumps(data, indent=indent), status=status, mimetype='application/json')
+    content = flask.current_app.json.dumps(data, default=_default)
+    return flask.current_app.response_class(content, status=status, mimetype='application/json')
 
 
-class JSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, datetime.datetime):
-            return obj.isoformat()
+def _default(obj):
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
 
-        if isinstance(obj, Job):
-            return job_to_dict(obj)
+    if isinstance(obj, Job):
+        return job_to_dict(obj)
 
-        return super(JSONEncoder, self).default(obj)
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
