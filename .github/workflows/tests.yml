@@ -24,4 +24,4 @@ jobs:
         pip install -r test-requirements.txt
         nosetests -v -l DEBUG --logging-level=DEBUG --with-coverage --cover-package=flask_apscheduler
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
