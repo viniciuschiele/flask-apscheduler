@@ -15,7 +15,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/x-rst',
     keywords=['apscheduler', 'scheduler', 'scheduling', 'cron'],
-    install_requires=['flask>=0.10.1', 'apscheduler>=3.2.0,<4.0.0', 'python-dateutil>=2.4.2'],
+    install_requires=['flask>=2.2.0,<3.0.0', 'apscheduler>=3.2.0,<4.0.0', 'python-dateutil>=2.4.2'],
     package_data={'Flask-APScheduler': ['LICENSE']},
     include_package_data=True,
     classifiers=[
