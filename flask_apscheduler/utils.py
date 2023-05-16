@@ -15,7 +15,6 @@
 """Utility module."""
 
 import dateutil.parser
-import six
 
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
@@ -114,13 +113,13 @@ def fix_job_def(job_def):
     """
     Replaces the datetime in string by datetime object.
     """
-    if isinstance(job_def.get("start_date"), six.string_types):
+    if isinstance(job_def.get("start_date"), str):
         job_def["start_date"] = dateutil.parser.parse(job_def.get("start_date"))
 
-    if isinstance(job_def.get("end_date"), six.string_types):
+    if isinstance(job_def.get("end_date"), str):
         job_def["end_date"] = dateutil.parser.parse(job_def.get("end_date"))
 
-    if isinstance(job_def.get("run_date"), six.string_types):
+    if isinstance(job_def.get("run_date"), str):
         job_def["run_date"] = dateutil.parser.parse(job_def.get("run_date"))
 
     # it keeps compatibility backward
