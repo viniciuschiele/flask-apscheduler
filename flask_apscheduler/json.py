@@ -9,7 +9,7 @@ from .utils import job_to_dict
 
 def jsonify(data, status=None):
     content = flask.current_app.json.dumps(data, default=_default)
-    return flask.current_app.response_class(content, status=status, mimetype='application/json')
+    return flask.current_app.response_class(content, status=status, mimetype="application/json")
 
 
 def _default(obj):
