@@ -1,2 +1,2 @@
-nose
+nose2[coverage_plugin]
 codecov
