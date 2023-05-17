@@ -27,7 +27,7 @@ from flask.helpers import get_debug_flag
 from . import api
 from .utils import fix_job_def, pop_trigger
 
-LOGGER = logging.getLogger('flask_apscheduler')
+LOGGER = logging.getLogger("flask_apscheduler")
 
 
 class APScheduler(object):
@@ -38,11 +38,11 @@ class APScheduler(object):
         self._host_name = socket.gethostname().lower()
         self._authentication_callback = None
 
-        self.allowed_hosts = ['*']
+        self.allowed_hosts = ["*"]
         self.auth = None
         self.api_enabled = False
-        self.api_prefix = '/scheduler'
-        self.endpoint_prefix = 'scheduler.'
+        self.api_prefix = "/scheduler"
+        self.endpoint_prefix = "scheduler."
         self.app = None
 
         if app:
@@ -96,9 +96,8 @@ class APScheduler(object):
         if get_debug_flag() and not werkzeug.serving.is_running_from_reloader():
             return
 
-        if self.host_name not in self.allowed_hosts and '*' not in self.allowed_hosts:
-            LOGGER.debug('Host name %s is not allowed to start the APScheduler. Servers allowed: %s' %
-                         (self.host_name, ','.join(self.allowed_hosts)))
+        if self.host_name not in self.allowed_hosts and "*" not in self.allowed_hosts:
+            LOGGER.debug(f"Host name {self.host_name} is not allowed to start the APScheduler. Servers allowed: {','.join(self.allowed_hosts)}")
             return
 
         self._scheduler.start(paused=paused)
@@ -158,9 +157,9 @@ class APScheduler(object):
         """
 
         job_def = dict(kwargs)
-        job_def['id'] = id
-        job_def['func'] = func
-        job_def['name'] = job_def.get('name') or id
+        job_def["id"] = id
+        job_def["func"] = func
+        job_def["name"] = job_def.get("name") or id
 
         fix_job_def(job_def)
 
@@ -218,7 +217,7 @@ class APScheduler(object):
 
         fix_job_def(changes)
 
-        if 'trigger' in changes:
+        if "trigger" in changes:
             trigger, trigger_args = pop_trigger(changes)
             self._scheduler.reschedule_job(id, jobstore, trigger, **trigger_args)
 
@@ -270,39 +269,39 @@ class APScheduler(object):
         """
         options = dict()
 
-        job_stores = self.app.config.get('SCHEDULER_JOBSTORES')
+        job_stores = self.app.config.get("SCHEDULER_JOBSTORES")
         if job_stores:
-            options['jobstores'] = job_stores
+            options["jobstores"] = job_stores
 
-        executors = self.app.config.get('SCHEDULER_EXECUTORS')
+        executors = self.app.config.get("SCHEDULER_EXECUTORS")
         if executors:
-            options['executors'] = executors
+            options["executors"] = executors
 
-        job_defaults = self.app.config.get('SCHEDULER_JOB_DEFAULTS')
+        job_defaults = self.app.config.get("SCHEDULER_JOB_DEFAULTS")
         if job_defaults:
-            options['job_defaults'] = job_defaults
+            options["job_defaults"] = job_defaults
 
-        timezone = self.app.config.get('SCHEDULER_TIMEZONE')
+        timezone = self.app.config.get("SCHEDULER_TIMEZONE")
         if timezone:
-            options['timezone'] = timezone
+            options["timezone"] = timezone
 
         self._scheduler.configure(**options)
 
-        self.auth = self.app.config.get('SCHEDULER_AUTH', self.auth)
-        self.api_enabled = self.app.config.get('SCHEDULER_VIEWS_ENABLED', self.api_enabled)  # for compatibility reason
-        self.api_enabled = self.app.config.get('SCHEDULER_API_ENABLED', self.api_enabled)
-        self.api_prefix = self.app.config.get('SCHEDULER_API_PREFIX', self.api_prefix)
-        self.endpoint_prefix = self.app.config.get('SCHEDULER_ENDPOINT_PREFIX', self.endpoint_prefix)
-        self.allowed_hosts = self.app.config.get('SCHEDULER_ALLOWED_HOSTS', self.allowed_hosts)
+        self.auth = self.app.config.get("SCHEDULER_AUTH", self.auth)
+        self.api_enabled = self.app.config.get("SCHEDULER_VIEWS_ENABLED", self.api_enabled)  # for compatibility reason
+        self.api_enabled = self.app.config.get("SCHEDULER_API_ENABLED", self.api_enabled)
+        self.api_prefix = self.app.config.get("SCHEDULER_API_PREFIX", self.api_prefix)
+        self.endpoint_prefix = self.app.config.get("SCHEDULER_ENDPOINT_PREFIX", self.endpoint_prefix)
+        self.allowed_hosts = self.app.config.get("SCHEDULER_ALLOWED_HOSTS", self.allowed_hosts)
 
     def _load_jobs(self):
         """
         Load the job definitions from the Flask configuration.
         """
-        jobs = self.app.config.get('SCHEDULER_JOBS')
+        jobs = self.app.config.get("SCHEDULER_JOBS")
 
         if not jobs:
-            jobs = self.app.config.get('JOBS')
+            jobs = self.app.config.get("JOBS")
 
         if jobs:
             for job in jobs:
@@ -312,19 +311,19 @@ class APScheduler(object):
         """
         Add the routes for the scheduler API.
         """
-        self._add_url_route('get_scheduler_info', '', api.get_scheduler_info, 'GET')
-        self._add_url_route('pause_scheduler', '/pause', api.pause_scheduler, 'POST')
-        self._add_url_route('resume_scheduler', '/resume', api.resume_scheduler, 'POST')
-        self._add_url_route('start_scheduler', '/start', api.start_scheduler, 'POST')
-        self._add_url_route('shutdown_scheduler', '/shutdown', api.shutdown_scheduler, 'POST')
-        self._add_url_route('add_job', '/jobs', api.add_job, 'POST')
-        self._add_url_route('get_job', '/jobs/<job_id>', api.get_job, 'GET')
-        self._add_url_route('get_jobs', '/jobs', api.get_jobs, 'GET')
-        self._add_url_route('delete_job', '/jobs/<job_id>', api.delete_job, 'DELETE')
-        self._add_url_route('update_job', '/jobs/<job_id>', api.update_job, 'PATCH')
-        self._add_url_route('pause_job', '/jobs/<job_id>/pause', api.pause_job, 'POST')
-        self._add_url_route('resume_job', '/jobs/<job_id>/resume', api.resume_job, 'POST')
-        self._add_url_route('run_job', '/jobs/<job_id>/run', api.run_job, 'POST')
+        self._add_url_route("get_scheduler_info", "", api.get_scheduler_info, "GET")
+        self._add_url_route("pause_scheduler", "/pause", api.pause_scheduler, "POST")
+        self._add_url_route("resume_scheduler", "/resume", api.resume_scheduler, "POST")
+        self._add_url_route("start_scheduler", "/start", api.start_scheduler, "POST")
+        self._add_url_route("shutdown_scheduler", "/shutdown", api.shutdown_scheduler, "POST")
+        self._add_url_route("add_job", "/jobs", api.add_job, "POST")
+        self._add_url_route("get_job", "/jobs/<job_id>", api.get_job, "GET")
+        self._add_url_route("get_jobs", "/jobs", api.get_jobs, "GET")
+        self._add_url_route("delete_job", "/jobs/<job_id>", api.delete_job, "DELETE")
+        self._add_url_route("update_job", "/jobs/<job_id>", api.update_job, "PATCH")
+        self._add_url_route("pause_job", "/jobs/<job_id>/pause", api.pause_job, "POST")
+        self._add_url_route("resume_job", "/jobs/<job_id>/resume", api.resume_job, "POST")
+        self._add_url_route("run_job", "/jobs/<job_id>/run", api.run_job, "POST")
 
     def _add_url_route(self, endpoint, rule, view_func, method):
         """
@@ -373,7 +372,7 @@ class APScheduler(object):
         """
         Return an authentication error.
         """
-        response = make_response('Access Denied')
-        response.headers['WWW-Authenticate'] = self.auth.get_authenticate_header()
+        response = make_response("Access Denied")
+        response.headers["WWW-Authenticate"] = self.auth.get_authenticate_header()
         response.status_code = 401
         return response

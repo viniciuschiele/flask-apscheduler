@@ -25,7 +25,7 @@ def get_authorization_header():
     Return request's 'Authorization:' header as
     a two-tuple of (type, info).
     """
-    header = request.environ.get('HTTP_AUTHORIZATION')
+    header = request.environ.get("HTTP_AUTHORIZATION")
 
     if not header:
         return None
@@ -77,7 +77,7 @@ class HTTPBasicAuth(HTTPAuth):
     """
     HTTP Basic authentication.
     """
-    www_authenticate_realm = 'Authentication Required'
+    www_authenticate_realm = "Authentication Required"
 
     def get_authorization(self):
         """
@@ -99,11 +99,11 @@ class HTTPBasicAuth(HTTPAuth):
         except Exception:
             return None
 
-        return Authorization('basic', username=bytes_to_wsgi(username), password=bytes_to_wsgi(password))
+        return Authorization("basic", username=bytes_to_wsgi(username), password=bytes_to_wsgi(password))
 
     def get_authenticate_header(self):
         """
         Return the value of `WWW-Authenticate` header in a
         `401 Unauthenticated` response.
         """
-        return 'Basic realm="%s"' % self.www_authenticate_realm
+        return f'Basic realm="{self.www_authenticate_realm}"'
