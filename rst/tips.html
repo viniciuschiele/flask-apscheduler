@@ -1,19 +1,19 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Examples" href="examples.html" />
 
-    <!-- Generated with Sphinx 6.2.1 and Furo 2023.03.27 -->
+    <!-- Generated with Sphinx 7.2.5 and Furo 2023.08.19 -->
         <title>Tips &amp; Troubleshooting - Flask APScheduler</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
-    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=82a976d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=4c969af8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-dropdown.css?v=995e94df" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-bootstrap.min.css?v=21c0b90a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -202,12 +202,12 @@
         </div>
         <article role="main">
           <section id="tips-troubleshooting">
-<h1>Tips &amp; Troubleshooting<a class="headerlink" href="#tips-troubleshooting" title="Permalink to this heading">#</a></h1>
+<h1>Tips &amp; Troubleshooting<a class="headerlink" href="#tips-troubleshooting" title="Link to this heading">#</a></h1>
 <p>When running Flask-APScheduler on a wsgi process only <strong>1</strong> worker should be enabled. APScheduler 3.0 will only work with a single worker process. Jobstores cannot be shared among multiple schedulers.</p>
 <p>See <a class="reference external" href="https://apscheduler.readthedocs.io/en/stable/">APScheduler’s</a> documentation for further help.</p>
 <p>Take a look at the <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> to see how it works.</p>
 <section id="environment-variables">
-<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Permalink to this heading">#</a></h2>
+<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading">#</a></h2>
 <p>Flask-Appscheduler will start a scheduler when running with an environment variable of <cite>FLASK_DEBUG=true</cite> and using flask’s werkzeug server OR when running with <cite>FLASK_DEBUG=false</cite> and a production server (gunicorn etc). If you have server details coded directly into the app you can use a pattern like this to help with development.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask.helpers</span> <span class="kn">import</span> <span class="n">get_debug_flag</span>
 <span class="k">if</span> <span class="n">get_debug_flag</span><span class="p">():</span>
@@ -218,11 +218,11 @@
 </div>
 </section>
 <section id="mixing-persistent-jobstores-with-tasks-from-config">
-<h2>Mixing Persistent Jobstores with Tasks from Config<a class="headerlink" href="#mixing-persistent-jobstores-with-tasks-from-config" title="Permalink to this heading">#</a></h2>
+<h2>Mixing Persistent Jobstores with Tasks from Config<a class="headerlink" href="#mixing-persistent-jobstores-with-tasks-from-config" title="Link to this heading">#</a></h2>
 <p>When using a persistent jobstore, do not register jobs from a configuration file. They should be registered by decorators (<a class="reference external" href="https://github.com/viniciuschiele/flask-apscheduler/blob/master/examples/decorated.py">see example</a>), or by using the <cite>add_job</cite> method.</p>
 </section>
 <section id="mixing-persistent-jobstores-with-tasks-in-init-py">
-<h2>Mixing Persistent Jobstores with Tasks in __init__.py<a class="headerlink" href="#mixing-persistent-jobstores-with-tasks-in-init-py" title="Permalink to this heading">#</a></h2>
+<h2>Mixing Persistent Jobstores with Tasks in __init__.py<a class="headerlink" href="#mixing-persistent-jobstores-with-tasks-in-init-py" title="Link to this heading">#</a></h2>
 <p>Tasks registered via decorator or the <cite>add_job</cite> method should not be loaded in your <cite>app/__init__.py</cite> if you are using a persistent job store. If they must be loaded upon app creation, a workaround would be as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/__init__.py</span>
 
@@ -255,7 +255,7 @@
 <p>Your task will then be registered the first time that someone makes any request to the Flask app.</p>
 </section>
 <section id="trying-to-load-tasks-outside-module-level-import">
-<h2>Trying to Load Tasks Outside Module-Level Import<a class="headerlink" href="#trying-to-load-tasks-outside-module-level-import" title="Permalink to this heading">#</a></h2>
+<h2>Trying to Load Tasks Outside Module-Level Import<a class="headerlink" href="#trying-to-load-tasks-outside-module-level-import" title="Link to this heading">#</a></h2>
 <p>If your task was loading correctly with the default memory jobstore, but does not load correctly from a persistent jobstore, this is because functions to be loaded as jobs must be available as module-level imports when used with persistent jobstores. They cannot be nested within other functions or classes.</p>
 <p>So this function could be added using the <cite>add_job</cite> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/tasks.py</span>
@@ -358,12 +358,12 @@
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
-    <script src="../_static/clipboard.min.js"></script>
-    <script src="../_static/copybutton.js"></script>
-    <script src="../_static/tabs.js"></script>
+</div><script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/tabs.js?v=3ee01567"></script>
     </body>
 </html>
