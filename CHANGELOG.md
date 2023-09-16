@@ -1,5 +1,11 @@
 # Changelog
 
+### Version 1.13.0
+ - Add endpoints to modify the scheduler state [#222](https://github.com/viniciuschiele/flask-apscheduler/pull/222).
+ - Bump minimum required `flask` version from 0.10 to 2.2.5 [#227](https://github.com/viniciuschiele/flask-apscheduler/pull/227).
+ - Drop support for Python < 3.8 [#229](https://github.com/viniciuschiele/flask-apscheduler/pull/229)
+ - Remove deprecated methods [#224](https://github.com/viniciuschiele/flask-apscheduler/pull/224)
+ 
 ### Version 1.12.4
  - Add logging to API endpoints [#197](https://github.com/viniciuschiele/flask-apscheduler/pull/197).
  - Fix issue [#203](https://github.com/viniciuschiele/flask-apscheduler/issues/203).
