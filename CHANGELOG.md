@@ -1,5 +1,8 @@
 # Changelog
 
+### Version 1.13.1
+ - Add support for Flask 3 [#236](https://github.com/viniciuschiele/flask-apscheduler/pull/236).
+
 ### Version 1.13.0
  - Add endpoints to modify the scheduler state [#222](https://github.com/viniciuschiele/flask-apscheduler/pull/222).
  - Bump minimum required `flask` version from 0.10 to 2.2.5 [#227](https://github.com/viniciuschiele/flask-apscheduler/pull/227).
